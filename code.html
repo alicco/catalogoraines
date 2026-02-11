@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>First Aid Kit Builder</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBlue: '#0f213c',
+                        teal: '#2a8a88',
+                        lightBlueBg: '#e0f7fa',
+                        statusGreen: '#4caf50',
+                        statusYellow: '#ffc107',
+                        statusRed: '#f44336',
+                        kitCyan: '#26c6da', // Approximated for Total Text
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 5px rgba(0,0,0,0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+<style data-purpose="custom-styles">
+        /* Custom scrollbar for better aesthetics in lists */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800 h-screen flex flex-col overflow-hidden">
+<!-- BEGIN: MainHeader -->
+<header class="bg-darkBlue text-white h-16 flex items-center justify-between px-6 shrink-0 z-10">
+<!-- Logo and Title Area -->
+<div class="flex items-center gap-3">
+<div class="bg-teal p-1 rounded-sm">
+<svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h1 class="font-semibold text-lg tracking-wide">First Aid Kit Builder with Expiration Tracking</h1>
+</div>
+<!-- Navigation Links -->
+<nav class="flex items-center gap-6 text-sm font-medium">
+<a class="hover:text-teal transition-colors" href="#">Home</a>
+<a class="text-white border-b-2 border-teal pb-0.5" href="#">Catalog</a>
+<a class="hover:text-teal transition-colors" href="#">My Kits</a>
+<a class="hover:text-teal transition-colors" href="#">Account</a>
+<!-- User Icon -->
+<a class="ml-2" href="#">
+<svg class="h-8 w-8 text-gray-300 hover:text-white transition-colors" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" fill-rule="evenodd"></path>
+</svg>
+</a>
+</nav>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 flex gap-6 p-6 overflow-hidden">
+<!-- BEGIN: Left Column (Product Catalog) -->
+<section class="flex flex-col w-1/4 min-w-[300px] h-full" data-purpose="catalog-column">
+<!-- Search Bar -->
+<div class="relative mb-4 shrink-0">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3">
+<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</span>
+<input class="w-full bg-darkBlue text-white placeholder-gray-400 rounded pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal text-sm border-none shadow-sm" placeholder="Search products..." type="text"/>
+</div>
+<!-- Product Grid -->
+<div class="overflow-y-auto pr-2 custom-scrollbar flex-1">
+<div class="grid grid-cols-2 gap-4">
+<!-- Product Card 1 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<span class="absolute top-2 left-2 bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-semibold">Categories</span>
+<img alt="Adhesive Bandages" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrVp_PBK2SVYNBb6WY48PC6aZnN9HAzbJ-ArPxVnPsWNaZqyRBZUCTiC6_RcLwxCD9dz-vMpODXbeKwTTiLjXuvBzMf25MOotukuz9EsvijzLE3zfO-ADtQgHwZkEnGew76zzbvchrplyOf1jyT23IO_5far6BwIv1S5Yv2m4u7XPtfLYpsBIBH9ZkLPYSKTLh0791MAile3ow4lur3b86Qiz-M2rKHheAq5i0eFKDhIG-mUgrfj3X4VPXkSfU4QUsucB6HC5CYAGj"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Adhesive Bandages (50 ct) - €6.50</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 2 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<span class="absolute top-2 left-2 bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-semibold">Categories</span>
+<img alt="Antiseptic Wipes" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm2Xm-koo1mSgiOqSgIKu9IfAoPCtM3QfYWypVATxOuw9zpWq7n4HBXGr0E33daMVx7WSIiZux4lzs1PY9WuEypJ7W0bBUa_KAy7JKtlvRHSwasdLAKWVglv5r8Imknm5idS_jABfl_E2VIemSxkGXBzJ0yNFZ9WycwsQ7Fd8aT_NA_rES-XUrf7NDg-INsUB1dth1hVJIHCsdikSvqwPQNbqX0nzMGxLiaKoWa-HOJ4ylQUeY7bDuX8r8AY1fDo_LWZGaE583jWv4"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Antiseptic Wipes (20 ct) - €4.50</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 3 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<span class="absolute top-2 left-2 bg-gray-100 text-gray-500 text-[10px] px-2 py-0.5 rounded-full font-semibold">Categories</span>
+<img alt="Burn Gel" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlvhydaVYWaQxbFo2-ziPvcxxBX92Vd5isp1k6iGBgI91sSWMSRERUjUNnQKeeNwSoAWbhnyKe3vAWjo5l-43eSTyXrAK_tvDRe1fF0NEF-usjMWh6HBA5TV2PZO9TNMInjATYUR-X1ivPmZJHBHvLxIiUf_mIGDmG39LIHv_BFfhvbf-YnzaQ19X7mD-EeQzAwe42pUun_7hLKEjYsP7wbQxm0GygQMXuQcB_VUwt8w9taWOpbxyGjiG_cl4D0y4fRPtbZssQy7Jr"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Burn Gel (50g) - €9.00</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 4 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<img alt="Elastic Bandage" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2cFiqDQ1EeQrTs_1BhNKofFxsRLy8wQpwteptJ_i66zraI4wTuW46Lt_PxYZFS5L3ywcKCouUK_6k0bT6PrUhID5meTdOxgvifmpFhLalFT2AfpLQGVDxy2JWvDPu3vLB6Jdg3QUjIHcNLcdredurI3dzSNyF0Rl4bC5H6Q3rLBnj3Z05RJ5Y0DABLJzPtZaJ7wubA_NKndc6rHEii1_U7AXxXoqWmKzqqKw6x6qOnGESUS2CWQgkrBFCEpxxHeVlcVf3r0892yJP"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Elastic Bandage (3 in) - €5.50</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 5 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<img alt="Gauze Pads" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm2Xm-koo1mSgiOqSgIKu9IfAoPCtM3QfYWypVATxOuw9zpWq7n4HBXGr0E33daMVx7WSIiZux4lzs1PY9WuEypJ7W0bBUa_KAy7JKtlvRHSwasdLAKWVglv5r8Imknm5idS_jABfl_E2VIemSxkGXBzJ0yNFZ9WycwsQ7Fd8aT_NA_rES-XUrf7NDg-INsUB1dth1hVJIHCsdikSvqwPQNbqX0nzMGxLiaKoWa-HOJ4ylQUeY7bDuX8r8AY1fDo_LWZGaE583jWv4"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Gauze Pads (4x4, 10 ct) - €6.00</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 6 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<img alt="Medical Tape" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2cFiqDQ1EeQrTs_1BhNKofFxsRLy8wQpwteptJ_i66zraI4wTuW46Lt_PxYZFS5L3ywcKCouUK_6k0bT6PrUhID5meTdOxgvifmpFhLalFT2AfpLQGVDxy2JWvDPu3vLB6Jdg3QUjIHcNLcdredurI3dzSNyF0Rl4bC5H6Q3rLBnj3Z05RJ5Y0DABLJzPtZaJ7wubA_NKndc6rHEii1_U7AXxXoqWmKzqqKw6x6qOnGESUS2CWQgkrBFCEpxxHeVlcVf3r0892yJP"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Medical Tape (1 in) - €3.50</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 7 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<img alt="Pain Relievers" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrVp_PBK2SVYNBb6WY48PC6aZnN9HAzbJ-ArPxVnPsWNaZqyRBZUCTiC6_RcLwxCD9dz-vMpODXbeKwTTiLjXuvBzMf25MOotukuz9EsvijzLE3zfO-ADtQgHwZkEnGew76zzbvchrplyOf1jyT23IO_5far6BwIv1S5Yv2m4u7XPtfLYpsBIBH9ZkLPYSKTLh0791MAile3ow4lur3b86Qiz-M2rKHheAq5i0eFKDhIG-mUgrfj3X4VPXkSfU4QUsucB6HC5CYAGj"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Pain Relievers (100 ct) - €12.00</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+<!-- Product Card 8 -->
+<article class="bg-white rounded-lg p-3 flex flex-col items-center text-center relative shadow-sm">
+<img alt="Scissors &amp; Tweezers" class="w-24 h-24 object-contain mt-4 mb-2 bg-gray-200"/>
+<h3 class="font-bold text-sm mb-1 leading-tight">Scissors &amp; Tweezers Set - €15.00</h3>
+<button class="mt-auto bg-teal hover:bg-teal/90 text-white text-xs font-semibold py-1.5 px-4 rounded-full w-full">Add to Kit</button>
+</article>
+</div>
+</div>
+</section>
+<!-- END: Left Column -->
+<!-- BEGIN: Center Column (Your Kit Builder) -->
+<section class="flex flex-col flex-1 h-full bg-lightBlueBg border-2 border-teal rounded-3xl overflow-hidden shadow-sm relative bg-[#e8f6f8] border-[#b2dfdb]" data-purpose="kit-builder-area">
+<div class="pt-6 pb-4 text-center">
+<h2 class="text-xl font-bold text-gray-800">Your Kit - Drag &amp; Drop to Configure</h2>
+</div>
+<!-- Draggable Area Container -->
+<div class="flex-1 p-6 overflow-y-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+<!-- Kit Item 1 (Good) -->
+<div class="bg-white p-3 rounded-lg relative flex flex-col items-center group cursor-grab active:cursor-grabbing shadow-sm">
+<button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<span class="absolute top-2 left-2 bg-statusGreen text-white text-[10px] font-bold px-2 py-0.5 rounded">Good</span>
+<img alt="Adhesive Bandages" class="w-20 h-20 object-contain my-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrVp_PBK2SVYNBb6WY48PC6aZnN9HAzbJ-ArPxVnPsWNaZqyRBZUCTiC6_RcLwxCD9dz-vMpODXbeKwTTiLjXuvBzMf25MOotukuz9EsvijzLE3zfO-ADtQgHwZkEnGew76zzbvchrplyOf1jyT23IO_5far6BwIv1S5Yv2m4u7XPtfLYpsBIBH9ZkLPYSKTLh0791MAile3ow4lur3b86Qiz-M2rKHheAq5i0eFKDhIG-mUgrfj3X4VPXkSfU4QUsucB6HC5CYAGj"/>
+<div class="text-center">
+<h4 class="font-bold text-sm leading-tight">Adhesive Bandages</h4>
+<p class="text-xs text-gray-600 font-bold">(50 ct) x2</p>
+</div>
+</div>
+<!-- Kit Item 2 (Expiring Soon) -->
+<div class="bg-white p-3 rounded-lg relative flex flex-col items-center group cursor-grab active:cursor-grabbing shadow-sm">
+<button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<span class="absolute top-2 left-2 text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded" style="background-color: #ffca28;">Expiring Soon</span>
+<img alt="Antiseptic Wipes" class="w-20 h-20 object-contain my-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAm2Xm-koo1mSgiOqSgIKu9IfAoPCtM3QfYWypVATxOuw9zpWq7n4HBXGr0E33daMVx7WSIiZux4lzs1PY9WuEypJ7W0bBUa_KAy7JKtlvRHSwasdLAKWVglv5r8Imknm5idS_jABfl_E2VIemSxkGXBzJ0yNFZ9WycwsQ7Fd8aT_NA_rES-XUrf7NDg-INsUB1dth1hVJIHCsdikSvqwPQNbqX0nzMGxLiaKoWa-HOJ4ylQUeY7bDuX8r8AY1fDo_LWZGaE583jWv4"/>
+<div class="text-center">
+<h4 class="font-bold text-sm leading-tight">Antiseptic Wipes</h4>
+<p class="text-xs text-gray-600 font-bold">(20 ct) x1</p>
+</div>
+</div>
+<!-- Kit Item 3 (Expired) -->
+<div class="bg-white p-3 rounded-lg relative flex flex-col items-center group cursor-grab active:cursor-grabbing shadow-sm">
+<button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<span class="absolute top-2 left-2 bg-statusRed text-white text-[10px] font-bold px-2 py-0.5 rounded">Expired</span>
+<img alt="Burn Gel" class="w-20 h-20 object-contain my-2 bg-gray-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlvhydaVYWaQxbFo2-ziPvcxxBX92Vd5isp1k6iGBgI91sSWMSRERUjUNnQKeeNwSoAWbhnyKe3vAWjo5l-43eSTyXrAK_tvDRe1fF0NEF-usjMWh6HBA5TV2PZO9TNMInjATYUR-X1ivPmZJHBHvLxIiUf_mIGDmG39LIHv_BFfhvbf-YnzaQ19X7mD-EeQzAwe42pUun_7hLKEjYsP7wbQxm0GygQMXuQcB_VUwt8w9taWOpbxyGjiG_cl4D0y4fRPtbZssQy7Jr"/>
+<div class="text-center">
+<h4 class="font-bold text-sm leading-tight">Burn Gel (50g)</h4>
+<p class="text-xs text-gray-600 font-bold">x1</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Center Column -->
+<!-- BEGIN: Right Column (Summary & Actions) -->
+<section class="flex flex-col w-1/4 min-w-[300px] gap-4" data-purpose="summary-column">
+<!-- Total Widget -->
+<div class="bg-white rounded-xl overflow-hidden flex flex-col shadow-md">
+<div class="bg-darkBlue p-4 text-center">
+<h2 class="text-3xl font-bold tracking-tight text-[#4dd0e1]">Total: €35.50</h2>
+</div>
+<div class="p-4 bg-white flex flex-col gap-3">
+<!-- Line Item 1 -->
+<div class="flex justify-between items-center text-sm font-medium text-gray-800 border-b border-gray-100 pb-2">
+<span>Adhesive Bandages (50 ct)</span>
+<div class="flex items-center gap-2">
+<span>€13.00</span>
+<button class="text-gray-400 hover:text-red-500"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+</div>
+</div>
+<!-- Line Item 2 -->
+<div class="flex justify-between items-center text-sm font-medium text-gray-800 border-b border-gray-100 pb-2">
+<span>Antiseptic Wipes (20 ct)</span>
+<div class="flex items-center gap-2">
+<span>€4.50</span>
+<button class="text-gray-400 hover:text-red-500"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+</div>
+</div>
+<!-- Line Item 3 -->
+<div class="flex justify-between items-center text-sm font-medium text-gray-800 border-b border-gray-100 pb-2">
+<span>Burn Gel (50g)</span>
+<div class="flex items-center gap-2">
+<span>€9.00</span>
+<button class="text-gray-400 hover:text-red-500"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+</div>
+</div>
+<!-- Line Item 4 -->
+<div class="flex justify-between items-center text-sm font-medium text-gray-800 pt-1">
+<span>Elastic Bandage (3 in)</span>
+<div class="flex items-center gap-2">
+<span>€9.00</span>
+<button class="text-gray-400 hover:text-red-500"><svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Safety Check Widget -->
+<div class="bg-white rounded-xl overflow-hidden flex flex-col shadow-md">
+<div class="bg-darkBlue p-3 text-center">
+<h3 class="text-lg font-bold text-white">Safety Check</h3>
+</div>
+<div class="p-4 flex items-center justify-between">
+<div class="flex flex-col gap-1 text-sm font-semibold">
+<span class="text-gray-800">Burn Gel <span style="color: #d32f2f; font-weight: bold;">(Expired)</span></span>
+<span class="text-gray-800">Antiseptic Wipes <span style="color: #f57c00; font-weight: bold;">(Expiring Soon)</span></span>
+</div>
+<button class="hover:bg-teal/90 text-white font-bold py-4 px-3 rounded-md shadow-sm text-xs leading-tight h-full flex items-center justify-center" style="background-color: #26a69a;">Quick Restock</button>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="mt-auto flex flex-col gap-3">
+<button class="w-full bg-darkBlue hover:bg-opacity-90 text-white font-medium py-3 rounded-full shadow-md transition-all">Save Kit Configuration</button>
+<button class="w-full bg-teal hover:bg-opacity-90 text-white font-medium py-3 rounded-full shadow-md transition-all">Preview Kit PDF</button>
+<button class="w-full bg-darkBlue hover:bg-opacity-90 text-white font-medium py-3 rounded-full shadow-md transition-all">Download Kit PDF</button>
+</div>
+</section>
+<!-- END: Right Column -->
+</main>
+<!-- END: MainContent -->
+</body></html>

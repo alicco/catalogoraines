@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raines - Visualizzatore Catalogo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --accent: #3498db;
+            --dark: #121212;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        input,
+        select {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .img-container {
+            width: 100%;
+            height: 260px;
+            background: transparent;
+            /* Rimosso sfondo bianco */
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .img-container img {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
+        }
+
+        .no-image {
+            color: #64748b;
+            font-size: 0.8em;
+            text-align: center;
+        }
+
+        .category-tag {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .code {
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .description {
+            font-size: 0.9em;
+            opacity: 0.7;
+            height: 3.2em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .badge-hq {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Lightbox / Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            max-width: 95%;
+            max-height: 95%;
+            background: #1e293b;
+            /* Sfondo scuro invece di bianco */
+            padding: 20px;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #f8fafc;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            border-radius: 10px;
+            background: transparent;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+        }
+
+        .modal-info {
+            width: 100%;
+            padding: 20px 0 0 0;
+            color: #e2e8f0;
+            text-align: left;
+            box-sizing: border-box;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 10px;
+        }
+
+        .product-card {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- ... (header e controlli rimangono uguali) ... -->
+        <header>
+            <div>
+                <h1 style="margin: 0; font-size: 1.5em;">📦 Raines - Catalogo Prodotti</h1>
+                <p style="margin: 5px 0 0 0; opacity: 0.6; font-size: 0.9em;">Visualizzazione sincronizzata con Supabase
+                    Storage (HQ 1200px)</p>
+            </div>
+            <div class="stats" id="stats-panel">
+                <div class="stat-item">Prodotti: <strong id="count-total">...</strong></div>
+                <div class="stat-item">Con Immagine: <strong id="count-img" style="color: var(--primary);">...</strong>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <input type="text" id="search-input" placeholder="Cerca per codice o descrizione...">
+            <select id="category-filter">
+                <option value="">Tutte le categorie</option>
+            </select>
+            <select id="image-status-filter">
+                <option value="all">Tutti i prodotti</option>
+                <option value="with">Solo con immagine</option>
+                <option value="without">Senza immagine</option>
+            </select>
+        </div>
+
+        <div id="catalog-grid" class="catalog-grid">
+            <div class="loader">Caricamento prodotti dal database...</div>
+        </div>
+    </div>
+
+    <!-- Modal for Zoom -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <img id="modal-img" src="" alt="Zoom">
+            <div class="modal-info">
+                <div id="modal-code" style="font-weight: 700; font-size: 1.2em; color: var(--primary);"></div>
+                <div id="modal-desc" style="margin: 5px 0 15px 0; font-size: 0.95em;"></div>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                    <div id="modal-price" style="font-weight: 700; font-size: 1.1em;"></div>
+                    <div id="modal-cat" style="font-size: 0.8em; text-transform: uppercase; color: #64748b;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const SUPABASE_URL = 'https://pbzeuxbmiawnjwpnbwkh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiemV1eGJtaWF3bmp3cG5id2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMzczNzcsImV4cCI6MjA4MzgxMzM3N30.YeGT5vQm2-LAdtCmWcX7EfTWyqIoyVJaO1mfCir2HgI';
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let allProducts = [];
+        let categories = [];
+
+        window.openModal = function (index) {
+            const p = allProducts.find(item => item.id === index);
+            if (!p) return;
+
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-img');
+
+            if (p.link_immagine) {
+                modalImg.src = `${p.link_immagine}?v=${Date.now()}`;
+                modalImg.style.display = 'block';
+            } else {
+                modalImg.style.display = 'none';
+            }
+
+            document.getElementById('modal-code').innerText = p.codice_articolo;
+            document.getElementById('modal-desc').innerText = p.descrizione;
+            document.getElementById('modal-price').innerText = `€ ${Number(p.costo || 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}`;
+            document.getElementById('modal-cat').innerText = p.categoria || 'Generico';
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        window.closeModal = function () {
+            const modal = document.getElementById('image-modal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on background click
+        document.getElementById('image-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'image-modal') closeModal();
+        });
+
+        async function init() {
+            await Promise.all([fetchProducts(), fetchCategories()]);
+            renderCatalog();
+            setupFilters();
+        }
+
+        async function fetchProducts() {
+            const { data, error } = await supabase
+                .from('catalogo')
+                .select('*')
+                .order('codice_articolo', { ascending: true });
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+            allProducts = data;
+
+            // Update stats
+            document.getElementById('count-total').innerText = allProducts.length;
+            document.getElementById('count-img').innerText = allProducts.filter(p => p.link_immagine).length;
+        }
+
+        async function fetchCategories() {
+            const { data, error } = await supabase
+                .from('catalogo')
+                .select('categoria')
+                .not('categoria', 'is', null);
+
+            if (error) return;
+
+            categories = [...new Set(data.map(p => p.categoria))].sort();
+            const select = document.getElementById('category-filter');
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('catalog-grid');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const category = document.getElementById('category-filter').value;
+            const imgStatus = document.getElementById('image-status-filter').value;
+
+            const filtered = allProducts.filter(p => {
+                const matchesSearch = !search || p.codice_articolo.toLowerCase().includes(search) || p.descrizione.toLowerCase().includes(search);
+                const matchesCategory = !category || p.categoria === category;
+                const matchesImg = imgStatus === 'all' || (imgStatus === 'with' ? p.link_immagine : !p.link_immagine);
+                return matchesSearch && matchesCategory && matchesImg;
+            });
+
+            grid.innerHTML = filtered.length ? '' : '<div class="loader">Nessun prodotto trovato per i filtri selezionati.</div>';
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.onclick = () => window.openModal(p.id);
+
+                const hasImg = p.link_immagine && p.link_immagine.includes('supabase.co');
+                const imgUrl = hasImg ? `${p.link_immagine}?v=${Date.now()}` : '';
+                const imgHtml = hasImg
+                    ? `<img src="${imgUrl}" loading="lazy" alt="${p.codice_articolo}">`
+                    : `<div class="no-image">📷 Nessuna immagine<br><small>${p.codice_articolo}.png</small></div>`;
+
+                card.innerHTML = `
+                    ${hasImg ? '<div class="badge-hq">HQ 1200</div>' : ''}
+                    <div class="img-container">${imgHtml}</div>
+                    <div class="category-tag">${p.categoria || 'Generico'}</div>
+                    <div class="code">${p.codice_articolo}</div>
+                    <div class="description">${p.descrizione}</div>
+                    <div class="footer">
+                        <div class="price">€ ${Number(p.costo || 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-size: 10px; opacity: 0.5;">IVA ${p.iva ? (p.iva * 100).toFixed(0) : 22}%</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupFilters() {
+            document.getElementById('search-input').addEventListener('input', renderCatalog);
+            document.getElementById('category-filter').addEventListener('change', renderCatalog);
+            document.getElementById('image-status-filter').addEventListener('change', renderCatalog);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
+
+</html>

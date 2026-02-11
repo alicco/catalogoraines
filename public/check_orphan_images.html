@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galleria Immagini Orfane - Raines</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #333; padding: 20px; }
+        h1 { color: #2c3e50; text-align: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 15px; text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        img { max-width: 100%; height: 150px; object-fit: contain; border-radius: 4px; background: #eee; }
+        .filename { margin-top: 10px; font-weight: bold; font-size: 0.9em; word-break: break-all; }
+        .instructions { background: #e8f4fd; border-left: 5px solid #3498db; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🖼️ Galleria Immagini Orfane</h1>
+    
+    <div class="instructions">
+        <p>Queste immagini sono su Supabase Storage ma <strong>non sono collegate</strong> a nessun prodotto perché il nome del file (es: IMG_0133) non corrisponde a un codice articolo.</p>
+        <p><strong>Cosa fare:</strong> Scorri la galleria, individua il prodotto e inviami la corrispondenza (es: IMG_0133 = A1020) così posso aggiornare il database per te!</p>
+    </div>
+
+    <div id="gallery" class="grid">
+        <!-- Caricamento dinamico tramite JS -->
+        <p style="text-align: center; grid-column: 1/-1;">Caricamento in corso...</p>
+    </div>
+
+    <script type="module">
+        const SUPABASE_URL = 'https://pbzeuxbmiawnjwpnbwkh.supabase.co';
+        const BUCKET_NAME = 'catalog';
+        const BASE_URL = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`;
+
+        // Lista dei file che sappiamo essere orfani (nomi IMG_xxx)
+        const orphanFiles = [
+            'IMG_0133.png', 'IMG_0134.png', 'IMG_0137.png', 'IMG_0142.png', 'IMG_0144.png',
+            'IMG_0146.png', 'IMG_0148.png', 'IMG_0149.png', 'IMG_0150.png', 'IMG_0153.png',
+            'IMG_0155.png', 'IMG_0156.png', 'IMG_0158.png', 'IMG_0161.png', 'IMG_0163.png',
+            'IMG_0164.png', 'IMG_0165.png', 'IMG_0167.png', 'IMG_0169.png', 'IMG_0172.png',
+            'IMG_0174.png', 'IMG_0176.png', 'IMG_0178.png', 'IMG_0182.png', 'IMG_0183.png',
+            'IMG_0185.png', 'IMG_0188.png', 'IMG_0190.png', 'IMG_0191.png', 'IMG_0196.png',
+            'IMG_0199.png', 'IMG_0206.png', 'IMG_0208.png', 'IMG_0211.png', 'IMG_0214.png',
+            'IMG_0215.png', 'IMG_0216.png', 'IMG_0219.png', 'IMG_0221.png', 'IMG_0223.png',
+            'IMG_0225.png', 'IMG_0227.png', 'IMG_0229.png', 'IMG_0232.png', 'IMG_0233.png',
+            'IMG_0234.png', 'IMG_0235.png', 'IMG_0239.png', 'IMG_0240.png', 'IMG_0243.png',
+            'IMG_0245.png', 'IMG_0247.png', 'IMG_0250.png', 'IMG_0252.png', 'IMG_0254.png',
+            'IMG_0255.png', 'IMG_0258.png', 'IMG_0260.png', 'IMG_0261.png', 'IMG_0264.png',
+            'IMG_0265.png', 'IMG_0267.png', 'IMG_0269.png', 'IMG_0271.png', 'IMG_0274.png',
+            'IMG_0278.png', 'IMG_0280.png'
+        ];
+
+        const galleryEl = document.getElementById('gallery');
+        galleryEl.innerHTML = '';
+
+        orphanFiles.forEach(file => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const imgUrl = `${BASE_URL}/${file}`;
+            
+            card.innerHTML = `
+                <img src="${imgUrl}" alt="${file}" onerror="this.src='https://via.placeholder.com/150?text=Errore+Caricamento'">
+                <div class="filename">${file}</div>
+            `;
+            galleryEl.appendChild(card);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+[
+    {
+        "item_id": "GZ-01",
+        "name": "Garza Sterile",
+        "price": 2.50,
+        "category": "medicazione",
+        "slot_size": 1,
+        "img_url": "https://placehold.co/100x100/png?text=Garza"
+    },
+    {
+        "item_id": "CER-02",
+        "name": "Cerotti Misti",
+        "price": 5.00,
+        "category": "medicazione",
+        "slot_size": 1,
+        "img_url": "https://placehold.co/100x100/png?text=Cerotti"
+    },
+    {
+        "item_id": "DIS-03",
+        "name": "Disinfettante",
+        "price": 8.50,
+        "category": "liquidi",
+        "slot_size": 2,
+        "img_url": "https://placehold.co/100x100/png?text=Disinfettante"
+    },
+    {
+        "item_id": "FOR-04",
+        "name": "Forbici",
+        "price": 12.00,
+        "category": "strumenti",
+        "slot_size": 2,
+        "img_url": "https://placehold.co/100x100/png?text=Forbici"
+    },
+    {
+        "item_id": "GHI-05",
+        "name": "Ghiaccio Secco",
+        "price": 3.00,
+        "category": "terapia",
+        "slot_size": 1,
+        "img_url": "https://placehold.co/100x100/png?text=Ghiaccio"
+    }
+]
