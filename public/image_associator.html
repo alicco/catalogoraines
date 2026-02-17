@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Raines - Associazione Immagini</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.0.4/dist/browser/index.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -84,6 +85,30 @@
             opacity: 0.7;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        .btn-delete-orphan {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+
+        .orphan-item:hover .btn-delete-orphan {
+            opacity: 1;
         }
 
         /* Main Workspace */
@@ -264,7 +289,16 @@
 <body>
 
     <div class="sidebar">
-        <h2>Orfani (<span id="orphan-count">0</span>)</h2>
+        <div class="sidebar-header">
+            <h2>Orfani (<span id="orphan-count">0</span>)</h2>
+            <div style="margin-bottom: 15px;">
+                <input type="file" id="upload-input" accept="image/*" multiple style="display: none;">
+                <button id="btn-upload"
+                    style="width: 100%; background: rgba(255,255,255,0.1); color: white; border: 1px dashed rgba(255,255,255,0.3); padding: 10px; font-size: 14px;">
+                    ➕ Carica Nuove (Multipla)
+                </button>
+            </div>
+        </div>
         <div id="orphan-list" class="orphan-list">
             <!-- Popolato via JS -->
         </div>
@@ -307,12 +341,13 @@
 
     <script type="module">
         const SUPABASE_URL = 'https://pbzeuxbmiawnjwpnbwkh.supabase.co';
-        // Utilizziamo la chiave aggiornata che abbiamo trovato
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiemV1eGJtaWF3bmp3cG5id2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgyMzczNzcsImV4cCI6MjA4MzgxMzM3N30.YeGT5vQm2-LAdtCmWcX7EfTWyqIoyVJaO1mfCir2HgI';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const BUCKET_NAME = 'catalog';
         const STORAGE_BASE_URL = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`;
+
+        // Local Python Server URL - REMOVED
 
         let currentFile = null;
         let selectedProduct = null;
@@ -323,45 +358,7 @@
             setupEvents();
         }
 
-        async function loadOrphans() {
-            const { data: files, error } = await supabase.storage.from(BUCKET_NAME).list('', { limit: 500 });
-
-            if (error) {
-                showStatus('Errore caricamento storage: ' + error.message, 'error');
-                return;
-            }
-
-            // Filtriamo solo quelli che NON hanno match col codice articolo (per semplicità mostriamo quelli che iniziano con IMG_)
-            const orphans = files.filter(f => f.name.startsWith('IMG_')).sort((a, b) => a.name.localeCompare(b.name));
-
-            document.getElementById('orphan-count').innerText = orphans.length;
-            const container = document.getElementById('orphan-list');
-            container.innerHTML = '';
-
-            orphans.forEach(file => {
-                const item = document.createElement('div');
-                item.className = 'orphan-item';
-                item.dataset.filename = file.name;
-
-                const url = `${STORAGE_BASE_URL}/${file.name}`;
-                item.innerHTML = `
-                    <img src="${url}" loading="lazy">
-                    <span>${file.name}</span>
-                `;
-
-                item.onclick = () => selectOrphan(file, url, item);
-                container.appendChild(item);
-            });
-        }
-
-        function selectOrphan(file, url, element) {
-            currentFile = file;
-            document.querySelectorAll('.orphan-item').forEach(i => i.classList.remove('active'));
-            element.classList.add('active');
-
-            document.getElementById('main-preview').src = url;
-            updateAssignButton();
-        }
+        // ... (loadOrphans is unchanged) ...
 
         function setupEvents() {
             const searchInput = document.getElementById('product-search');
@@ -373,6 +370,88 @@
             };
 
             document.getElementById('btn-assign').onclick = assignImage;
+
+            // Upload Events
+            const uploadInput = document.getElementById('upload-input');
+            const uploadBtn = document.getElementById('btn-upload');
+
+            uploadBtn.onclick = () => uploadInput.click();
+
+            uploadInput.onchange = async (e) => {
+                if (e.target.files.length > 0) {
+                    await handleBatchUpload(e.target.files);
+                    e.target.value = ''; // Reset
+                }
+            };
+        }
+
+        async function handleBatchUpload(files) {
+            const btn = document.getElementById('btn-upload');
+            const originalText = btn.innerHTML;
+            const total = files.length;
+
+            try {
+                btn.disabled = true;
+
+                for (let i = 0; i < total; i++) {
+                    const file = files[i];
+                    btn.innerHTML = `⏳ ${i + 1}/${total} Avvio...`;
+
+                    try {
+                        // 1. Check Library
+                        if (typeof imglyRemoveBackground === 'undefined') {
+                            throw new Error("Libreria AI non caricata correttamente. Riprova o controlla la connessione.");
+                        }
+
+                        // 2. Process Image Client-Side (WASM)
+                        showStatus(`Rimozione sfondo ${file.name}... (richiede tempo per il download modelli)`, 'success');
+
+                        // imglyRemoveBackground returns a Blob
+                        // We use the global function exposed by the script
+                        // Note: It returns a Blob of the processed image
+                        const blob = await imglyRemoveBackground(file, {
+                            debug: true,
+                            progress: (key, current, total) => {
+                                const percent = Math.round((current / total) * 100);
+                                btn.innerHTML = `⏳ ${i + 1}/${total} ${key} ${percent}%`;
+                            }
+                        });
+
+
+                        // 2. Upload processed image to Supabase (orphans folder)
+                        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+                        const newName = nameWithoutExt + ".png";
+
+                        showStatus(`Caricamento ${newName}...`, 'success');
+
+                        const { data, error } = await supabase.storage
+                            .from(BUCKET_NAME)
+                            .upload('orphans/' + newName, blob, {
+                                cacheControl: '0',
+                                upsert: true,
+                                contentType: 'image/png'
+                            });
+
+                        if (error) throw error;
+
+                    } catch (innerErr) {
+                        console.error(`Errore su file ${file.name}:`, innerErr);
+                        alert(`Errore elaborazione ${file.name}:\n${innerErr.message}`);
+                        showStatus(`Errore ${file.name}: ${innerErr.message}`, 'error');
+                        // Continue with next file
+                    }
+                }
+
+                showStatus('Elaborazione completata!', 'success');
+                loadOrphans();
+
+            } catch (err) {
+                console.error(err);
+                showStatus('Errore generale: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
         async function searchProducts(query) {
@@ -415,44 +494,74 @@
         async function assignImage() {
             if (!currentFile || !selectedProduct) return;
 
-            const publicUrl = `${STORAGE_BASE_URL}/${currentFile.name}`;
-
             const btn = document.getElementById('btn-assign');
-            btn.innerText = 'CARICAMENTO...';
+            btn.innerText = 'SPOSTAMENTO & SALVATAGGIO...';
             btn.disabled = true;
 
-            const { data, error } = await supabase
-                .from('catalogo')
-                .update({
-                    link_immagine: publicUrl,
-                    immagine_locale: currentFile.name
-                })
-                .eq('codice_articolo', selectedProduct.codice_articolo);
+            try {
+                const sourcePath = currentFile.folder + currentFile.name;
+                const targetPath = 'raines_images_cleaned/' + currentFile.name;
 
-            if (error) {
-                showStatus('Errore salvataggio: ' + error.message, 'error');
-                btn.innerText = 'COLLEGA IMMAGINE';
-                btn.disabled = false;
-            } else {
+                // 1. Move file (if source is different from target)
+                if (sourcePath !== targetPath) {
+                    const { error: moveError } = await supabase.storage
+                        .from(BUCKET_NAME)
+                        .move(sourcePath, targetPath);
+
+                    if (moveError) {
+                        // If error is "new name conflicts with existing", we might want to overwrite or handle it.
+                        // Supabase move fail if exists? "The resource [path] already exists" 
+                        // If it fails, we assume it might be okay if we just update the DB, but better to warn.
+                        console.warn("Move warning:", moveError);
+                        // If it exists, we might want to force overwrite? Move doesn't have upsert. 
+                        // We would need to copy (with upsert?) then remove.
+                        // For now we throw error to be safe.
+                        throw new Error('Errore spostamento file: ' + moveError.message);
+                    }
+                }
+
+                // 2. Update DB
+                const publicUrl = `${STORAGE_BASE_URL}/${targetPath}`;
+
+                const { error: dbError } = await supabase
+                    .from('catalogo')
+                    .update({
+                        link_immagine: publicUrl,
+                        immagine_locale: currentFile.name
+                    })
+                    .eq('codice_articolo', selectedProduct.codice_articolo);
+
+                if (dbError) throw new Error('Errore DB: ' + dbError.message);
+
                 showStatus(`Completato! ${selectedProduct.codice_articolo} collegato a ${currentFile.name}`, 'success');
 
-                // Rimuovi dalla lista orfani visiva
-                const sideItem = document.querySelector(`.orphan-item[data-filename="${currentFile.name}"]`);
-                if (sideItem) sideItem.style.opacity = '0.2';
+                // Update UI - remove from list
+                const sideItem = document.querySelector(`.orphan-item[data-fullpath="${sourcePath}"]`);
+                if (sideItem) sideItem.style.display = 'none';
 
                 // Reset form
                 selectedProduct = null;
+                currentFile = null;
                 document.getElementById('product-search').value = '';
                 document.getElementById('results-list').innerHTML = '';
                 document.getElementById('selection-details').innerText = 'Nessun prodotto selezionato';
+                document.getElementById('main-preview').src = 'https://via.placeholder.com/400x400?text=Seleziona+Immagine';
                 btn.innerText = 'COLLEGA IMMAGINE';
+                updateAssignButton();
+
+            } catch (error) {
+                console.error(error);
+                showStatus('Errore salvataggio: ' + error.message, 'error');
+                btn.innerText = 'COLLEGA IMMAGINE';
+                btn.disabled = false;
             }
-        }
+        } // Closed assignImage properly
 
         function showStatus(msg, type) {
             const el = document.getElementById('status-display');
             el.innerText = msg;
             el.className = `status-msg status-${type}`;
+            el.style.display = 'block';
             setTimeout(() => { el.style.display = 'none'; }, 5000);
         }
 

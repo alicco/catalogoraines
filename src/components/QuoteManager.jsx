@@ -120,34 +120,6 @@ export function QuoteManager() {
             )
         },
         {
-            field: 'discount',
-            headerName: 'Sconto (%)',
-            width: 120,
-            renderCell: (params) => (
-                <div onClick={() => handleEditDiscount(params)} className="cursor-pointer bg-white hover:bg-green-light/30 px-3 py-1 rounded border border-gray-200 text-center font-bold text-green-primary transition-colors">
-                    {params.value ? `${params.value}%` : '0%'}
-                </div>
-            )
-        },
-        {
-            field: 'expirationDate',
-            headerName: 'Validità',
-            width: 180,
-            renderCell: (params) => (
-                <div onClick={() => handleEditExpiration(params)} className="cursor-pointer px-2 py-1 rounded hover:bg-green-light/20 transition-all flex items-center justify-center">
-                    {params.value ? (
-                        <Chip
-                            label={new Date(params.value).toLocaleDateString('it-IT')}
-                            color={new Date(params.value) < new Date() ? "error" : "success"}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontWeight: '800', fontSize: '0.7rem' }}
-                        />
-                    ) : <span className="text-gray-400 font-bold text-[10px] uppercase tracking-wider">Imposta</span>}
-                </div>
-            )
-        },
-        {
             field: 'createdAt',
             headerName: 'Creato il',
             width: 140,
@@ -160,19 +132,19 @@ export function QuoteManager() {
         {
             field: 'actions',
             headerName: 'Azioni',
-            width: 130,
+            width: 180,
             sortable: false,
             headerAlign: 'center',
             renderCell: (params) => (
                 <div className="flex gap-2 h-full items-center justify-center">
                     <Tooltip title="Apri nel Builder">
-                        <IconButton
-                            size="small"
+                        <button
                             onClick={() => handleLoad(params.row)}
-                            className="bg-green-mid/10 text-green-primary hover:bg-green-primary hover:text-white transition-all border border-green-mid/20"
+                            className="btn-skeuo px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-normal flex items-center gap-2 shadow-sm hover:shadow-md transition-all active:scale-95"
                         >
-                            <RestoreIcon fontSize="small" />
-                        </IconButton>
+                            <RestoreIcon sx={{ fontSize: 16 }} />
+                            CARICA
+                        </button>
                     </Tooltip>
                     <Tooltip title="Elimina">
                         <IconButton

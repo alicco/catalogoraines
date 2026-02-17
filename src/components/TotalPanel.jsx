@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useStore from '../lib/store';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import { KitPDFDocument } from './KitPDFDocument';
 import { Dialog, DialogContent, DialogActions, Button, DialogTitle, TextField, Snackbar, Alert } from '@mui/material';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 export function TotalPanel() {
     const catalogItems = useStore((state) => state.catalogItems);
-    const removeFromCatalog = useStore((state) => state.removeFromCatalog);
     const saveCatalogToSupabase = useStore((state) => state.saveCatalogToSupabase);
     const user = useStore((state) => state.user);
-    const catalogDiscount = useStore((state) => state.catalogDiscount || 0);
-    const catalogExpirationDate = useStore((state) => state.catalogExpirationDate || null);
+    const promotions = useStore((state) => state.promotions);
+    const loadPromotions = useStore((state) => state.loadPromotions);
+    const setView = useStore((state) => state.setView);
 
     const [saveDialogOpen, setSaveDialogOpen] = useState(false);
     const [catalogName, setCatalogName] = useState('');
@@ -18,18 +17,30 @@ export function TotalPanel() {
 
     const clearCatalog = useStore((state) => state.clearCatalog);
 
+    useEffect(() => {
+        loadPromotions();
+    }, [loadPromotions]);
+
+    // Active promotions (not expired, flag active)
+    const now = new Date().toISOString().slice(0, 10);
+    const activePromos = promotions.filter(p => {
+        if (!p.active) return false;
+        if (p.validFrom && now < p.validFrom) return false;
+        if (p.validTo && now > p.validTo) return false;
+        return true;
+    });
+
     const handleSaveConfirm = async () => {
         if (!catalogName.trim()) {
             setSnackbar({ open: true, message: "Inserisci un nome per il catalogo.", severity: 'warning' });
             return;
         }
 
-        // Use local saving
         const saveLocalCatalog = useStore.getState().saveLocalCatalog;
         await saveLocalCatalog({ name: catalogName });
 
         setSaveDialogOpen(false);
-        setCatalogName(''); // Reset
+        setCatalogName('');
         setSnackbar({ open: true, message: "Catalogo salvato correttamente! ✅", severity: 'success' });
     };
 
@@ -38,27 +49,70 @@ export function TotalPanel() {
         setSaveDialogOpen(true);
     };
 
+    const PROMO_TYPE_LABELS = {
+        product: '🏷️ Prodotto',
+        threshold: '💰 Soglia',
+        bundle: '📦 Bundle',
+    };
+
     return (
         <>
-            {/* Catalog Widget */}
-            <div className="bg-white rounded-xl overflow-hidden flex flex-col shadow-md">
-                <div className="bg-green-primary p-3 md:p-4 text-center relative">
-                    <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[#4dd0e1]">Prodotti Selezionati</h2>
+            {/* Promozioni Attive Widget */}
+            <div className="card-skeuo rounded-xl overflow-hidden flex flex-col mb-4">
+                <div className="bg-green-primary border-b border-green-dark p-3 md:p-4 text-center relative">
+                    <h2 className="text-xl md:text-2xl font-black tracking-tighter text-white flex items-center justify-center gap-2 font-sans">
+                        <LocalOfferIcon style={{ fontSize: 24 }} />
+                        PROMOZIONI ATTIVE
+                    </h2>
+                    {activePromos.length > 0 && (
+                        <span className="absolute top-3 right-3 bg-white text-green-primary text-xs font-black px-2 py-0.5 rounded-full shadow">
+                            {activePromos.length}
+                        </span>
+                    )}
                 </div>
                 <div className="p-3 md:p-4 bg-white flex flex-col gap-2 md:gap-3 max-h-48 md:max-h-60 overflow-y-auto custom-scrollbar">
-                    {catalogItems.map((item) => (
-                        <div key={item.instanceId} className="flex justify-between items-center text-xs md:text-sm font-medium text-gray-800 border-b border-gray-100 pb-2">
-                            <span className="truncate mr-2 flex-1">{item.name}</span>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => removeFromCatalog(item.instanceId)} className="text-gray-400 hover:text-red-500" aria-label="Rimuovi dal catalogo">
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                                    </svg>
-                                </button>
+                    {activePromos.slice(0, 5).map((promo) => (
+                        <div key={promo.id} className="flex justify-between items-center text-xs md:text-sm font-medium text-gray-800 border-b border-slate-100 pb-2 last:border-b-0">
+                            <div className="flex flex-col flex-1 mr-2">
+                                <span className="font-bold text-slate-800 truncate uppercase tracking-tight font-sans">{promo.name}</span>
+                                <span className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                    {PROMO_TYPE_LABELS[promo.type] || promo.type}
+                                    {promo.validTo && (
+                                        <span className="font-bold ml-1 text-green-primary">
+                                            • Scade il {new Date(promo.validTo).toLocaleDateString('it-IT')}
+                                        </span>
+                                    )}
+                                </span>
+                            </div>
+                            <div className="flex flex-col items-end gap-0.5">
+                                <span className="bg-green-light text-green-primary text-xs font-black px-2 py-1 rounded border border-green-primary/20 whitespace-nowrap">
+                                    {promo.discountType === 'percentage'
+                                        ? `-${promo.discountValue}%`
+                                        : `-€${Number(promo.discountValue).toFixed(2)}`
+                                    }
+                                </span>
                             </div>
                         </div>
                     ))}
-                    {catalogItems.length === 0 && <div className="text-center text-gray-400 italic text-sm">Nessun prodotto selezionato</div>}
+                    {activePromos.length === 0 && (
+                        <div className="text-center text-slate-400 italic text-sm py-4 bg-paper rounded-lg border border-slate-200 border-dashed">
+                            Nessuna promozione attiva al momento
+                        </div>
+                    )}
+                    {activePromos.length > 5 && (
+                        <div className="text-center text-xs text-slate-400 font-bold pt-1">
+                            +{activePromos.length - 5} altre promozioni...
+                        </div>
+                    )}
+                </div>
+                <div className="px-3 pb-3 pt-1">
+                    <button
+                        onClick={() => setView('promo-manager')}
+                        className="btn-skeuo w-full py-2.5 rounded-lg font-bold text-xs uppercase tracking-wide flex items-center justify-center gap-2 shadow-sm"
+                    >
+                        <LocalOfferIcon style={{ fontSize: 16 }} />
+                        Gestisci Promozioni
+                    </button>
                 </div>
             </div>
 
@@ -75,7 +129,7 @@ export function TotalPanel() {
                     </div>
                     <svg className="w-5 h-5 text-slate-300 group-hover:text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                 </a>
-                <a
+                {/* <a
                     href="/image_associator.html"
                     className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100 shadow-sm hover:border-teal hover:shadow-md transition-all group"
                 >
@@ -84,7 +138,7 @@ export function TotalPanel() {
                         <span className="text-[10px] text-slate-400">Associazione immagini bulk</span>
                     </div>
                     <svg className="w-5 h-5 text-slate-300 group-hover:text-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-                </a>
+                </a> */}
             </div>
 
             {/* Action Buttons */}
@@ -122,7 +176,6 @@ export function TotalPanel() {
                     <Button onClick={handleSaveConfirm} variant="contained" sx={{ bgcolor: '#006233', '&:hover': { bgcolor: '#4A9A5F' } }}>Salva</Button>
                 </DialogActions>
             </Dialog>
-
 
             {/* Toast Notification */}
             <Snackbar

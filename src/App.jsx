@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 import { ProductManager } from './components/ProductManager';
 import { QuoteManager } from './components/QuoteManager';
+import { PromoManager } from './components/PromoManager';
 import { FlipbookCatalog2 } from './components/FlipbookCatalog2';
 
 // Custom Drag Layer for preview during drag (touch only, HTML5 has native preview)
@@ -119,6 +120,14 @@ function App() {
     return (
       <ErrorBoundary>
         <QuoteManager />
+      </ErrorBoundary>
+    );
+  }
+
+  if (currentView === 'promo-manager') {
+    return (
+      <ErrorBoundary>
+        <PromoManager />
       </ErrorBoundary>
     );
   }

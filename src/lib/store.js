@@ -424,10 +424,82 @@ const useStore = create((set, get) => ({
             catalogExpirationDate: catalog.expirationDate || null
         });
     },
+    // --- Promotions Engine ---
+    promotions: [],
+
+    loadPromotions: () => {
+        try {
+            const saved = localStorage.getItem('raines-promotions-v1');
+            if (saved) {
+                set({ promotions: JSON.parse(saved) });
+            }
+        } catch (e) {
+            console.error("Error loading promotions", e);
+        }
+    },
+
+    _savePromotionsToStorage: (promos) => {
+        try {
+            localStorage.setItem('raines-promotions-v1', JSON.stringify(promos));
+        } catch (e) {
+            console.error("Error saving promotions", e);
+        }
+    },
+
+    savePromotion: (promo) => {
+        set((state) => {
+            const existing = state.promotions.find(p => p.id === promo.id);
+            let updated;
+            if (existing) {
+                updated = state.promotions.map(p => p.id === promo.id ? { ...p, ...promo, updatedAt: new Date().toISOString() } : p);
+            } else {
+                const newPromo = {
+                    ...promo,
+                    id: promo.id || crypto.randomUUID(),
+                    active: promo.active !== undefined ? promo.active : true,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                };
+                updated = [...state.promotions, newPromo];
+            }
+            get()._savePromotionsToStorage(updated);
+            return { promotions: updated };
+        });
+    },
+
+    deletePromotion: (id) => {
+        set((state) => {
+            const updated = state.promotions.filter(p => p.id !== id);
+            get()._savePromotionsToStorage(updated);
+            return { promotions: updated };
+        });
+    },
+
+    togglePromotion: (id) => {
+        set((state) => {
+            const updated = state.promotions.map(p =>
+                p.id === id ? { ...p, active: !p.active, updatedAt: new Date().toISOString() } : p
+            );
+            get()._savePromotionsToStorage(updated);
+            return { promotions: updated };
+        });
+    },
+
+    getActivePromotions: () => {
+        const state = get();
+        const now = new Date().toISOString().slice(0, 10);
+        return state.promotions.filter(p => {
+            if (!p.active) return false;
+            if (p.validFrom && now < p.validFrom) return false;
+            if (p.validTo && now > p.validTo) return false;
+            return true;
+        });
+    },
+
     loading: false,
     myKits: [],
     isAdminMode: true,
-    currentView: 'kit', // 'kit' or 'product-manager'
+    currentView: 'kit', // 'kit' or 'product-manager' or 'promo-manager'
 
     setView: (view) => set({ currentView: view }),
     checkUser: async () => { /* Duplicate? Removing duplicate checkUser below, but wait, checkUser was below too? */ }
