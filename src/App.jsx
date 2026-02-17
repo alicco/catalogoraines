@@ -9,6 +9,7 @@ import { TotalPanel } from './components/TotalPanel';
 import { Toast } from './components/Toast';
 import useStore from './lib/store';
 import { Header } from './components/Header';
+import { LoginPage } from './components/LoginPage';
 
 import { ProductEditor } from './components/ProductEditor';
 
@@ -80,19 +81,26 @@ function App() {
   const inventory = useStore((state) => state.inventory);
   const fetchCatalog = useStore((state) => state.fetchCatalog);
   const currentView = useStore((state) => state.currentView);
+  const isAuthenticated = useStore((state) => state.isAuthenticated);
+  const authLoading = useStore((state) => state.authLoading);
+  const checkUser = useStore((state) => state.checkUser);
 
   useEffect(() => {
-    fetchCatalog();
+    checkUser();
+  }, [checkUser]);
 
-    const params = new URLSearchParams(window.location.search);
-    const catalogData = params.get('k');
-    if (catalogData) {
-      // We might need to wait for inventory to be loaded if loading from URL
-      // but for now we just trigger it.
-      useStore.getState().loadFromEncoded(catalogData);
-      setToast({ message: "Catalogo caricato!", type: "info" });
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCatalog();
+
+      const params = new URLSearchParams(window.location.search);
+      const catalogData = params.get('k');
+      if (catalogData) {
+        useStore.getState().loadFromEncoded(catalogData);
+        setToast({ message: "Catalogo caricato!", type: "info" });
+      }
     }
-  }, [fetchCatalog]);
+  }, [fetchCatalog, isAuthenticated]);
 
   // Handle item drop - called from CatalogBuilder
   const handleDrop = (item) => {
@@ -106,6 +114,23 @@ function App() {
     setToast({ message: `${item.name} aggiunto al catalogo`, type: 'success' });
     setTimeout(() => setToast(null), 3000);
   };
+
+  // --- Auth Gate ---
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, #1E3F2F, #2E5C45)' }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <img src="/RainesNero.svg" alt="Raines" className="h-16 w-auto brightness-0 invert opacity-60 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   if (currentView === 'product-manager') {
     return (

@@ -23,6 +23,11 @@ const saveLocalInventory = (inventory) => {
 };
 
 const useStore = create((set, get) => ({
+    // --- Auth State ---
+    user: null,
+    isAuthenticated: false,
+    authLoading: true,
+
     // Catalog State - Start with empty, will be filled by fetchCatalog
     inventory: [],
     categories: ['All'],
@@ -224,19 +229,32 @@ const useStore = create((set, get) => ({
 
     toggleAdminMode: () => set((state) => ({ isAdminMode: !state.isAdminMode })),
 
-    // --- Auth Actions (Kept but largely unused for local admin) ---
+    // --- Auth Actions ---
     checkUser: async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        set({ user: session?.user || null });
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            set({
+                user: session?.user || null,
+                isAuthenticated: !!session?.user,
+                authLoading: false,
+            });
+        } catch (err) {
+            console.error('Error checking user session:', err);
+            set({ user: null, isAuthenticated: false, authLoading: false });
+        }
 
         supabase.auth.onAuthStateChange((_event, session) => {
-            set({ user: session?.user || null });
+            set({
+                user: session?.user || null,
+                isAuthenticated: !!session?.user,
+            });
         });
     },
 
     signIn: async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        set({ user: data.user, isAuthenticated: true });
         return data;
     },
 
@@ -248,7 +266,7 @@ const useStore = create((set, get) => ({
 
     signOut: async () => {
         await supabase.auth.signOut();
-        set({ user: null, myKits: [] });
+        set({ user: null, isAuthenticated: false, myKits: [] });
     },
 
     // --- Database Actions ---
@@ -502,7 +520,6 @@ const useStore = create((set, get) => ({
     currentView: 'kit', // 'kit' or 'product-manager' or 'promo-manager'
 
     setView: (view) => set({ currentView: view }),
-    checkUser: async () => { /* Duplicate? Removing duplicate checkUser below, but wait, checkUser was below too? */ }
 }));
 
 export default useStore;
