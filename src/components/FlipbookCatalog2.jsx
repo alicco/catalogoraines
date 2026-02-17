@@ -846,7 +846,8 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                     // Validity
                     if (promo.validTo) {
                         doc.setFontSize(8); // Increased from 6
-                        doc.setTextColor(COLORS.primaryDeep.r, COLORS.primaryDeep.g, COLORS.primaryDeep.b); // Uses app primary color
+                        const c = PDF_COLORS.primaryDeep;
+                        doc.setTextColor(c.r, c.g, c.b); // Uses PDF_COLORS (object) instead of COLORS (hex string)
                         doc.setFont("helvetica", "bold"); // Changed to bold
                         doc.text(`Scadenza: ${new Date(promo.validTo).toLocaleDateString('it-IT')}`, 32, promoY + 16);
                     }
@@ -1068,7 +1069,7 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                         // Expiry date
                         if (productPromo.validTo) {
                             doc.setFontSize(6); // Increased from 5.5
-                            doc.setTextColor(80, 80, 80); // Darker gray
+                            doc.setTextColor(80, 80, 80); // Darker gray (fixed value, safe)
                             doc.setFont("helvetica", "bold"); // Bold
                             doc.text(`fino al ${new Date(productPromo.validTo).toLocaleDateString('it-IT')}`, W - 36, y + 11, { align: 'center' });
                         }
