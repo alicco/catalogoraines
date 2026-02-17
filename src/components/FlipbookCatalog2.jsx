@@ -606,8 +606,8 @@ const PromoPage = forwardRef(({ promotions = [], pageNum, isLeft }, ref) => (
                                 {getPromoDefaultDesc(promo)}
                             </p>
                             {promo.validTo && (
-                                <span className="text-[11px] font-bold mt-2 block" style={{ color: promo.color || COLORS.primaryDeep }}>
-                                    Valido fino al {new Date(promo.validTo).toLocaleDateString('it-IT')}
+                                <span className="text-[10px] font-bold mt-1 block uppercase tracking-wide" style={{ color: promo.color || COLORS.primaryDeep, fontFamily: 'Inter, sans-serif' }}>
+                                    Scadenza: {new Date(promo.validTo).toLocaleDateString('it-IT')}
                                 </span>
                             )}
                         </div>
