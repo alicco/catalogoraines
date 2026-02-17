@@ -1096,14 +1096,16 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                     }
 
                     // Price
+                    // Price (Moved to bottom of row to match visible design and avoid overlap)
                     doc.setFontSize(7);
                     doc.setTextColor(160, 160, 160);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Cad.${p.unita_vendita ? ` (${p.unita_vendita})` : ''}`, W - 20, y + 5, { align: 'right' });
+                    doc.text(`Cad.${p.unita_vendita ? ` (${p.unita_vendita})` : ''}`, W - 20, y + rowHeight - 10, { align: 'right' });
+
                     doc.setFontSize(13);
                     doc.setTextColor(cPrimary.r, cPrimary.g, cPrimary.b);
                     doc.setFont("helvetica", "bold");
-                    doc.text(formatPrice(p.price), W - 20, y + 12, { align: 'right' });
+                    doc.text(formatPrice(p.price), W - 20, y + rowHeight - 5, { align: 'right' });
 
                     // Separator
                     if (j < 4) { // Draw lines for first 4 items, 5th doesn't need
