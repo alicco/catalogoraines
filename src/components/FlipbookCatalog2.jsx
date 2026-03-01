@@ -278,113 +278,18 @@ const BackCover = forwardRef((props, ref) => (
 ));
 
 // ============================================================================
-// NEW: MOSAIC PAGE (LEFT) — Diamond grid + decorative fills + Fig labels
+// NEW: PRODUCT LIST PAGE (Entrambe le pagine) — Righe Prodotto (Img + Testo)
 // ============================================================================
-// ============================================================================
-// NEW: MOSAIC PAGE (LEFT) — Diamond layout based on internosin.svg
-// ============================================================================
-// ============================================================================
-// NEW: MOSAIC PAGE (LEFT) — Diamond layout based on internosin.svg
-// Treating slots as absolute centers of square containers rotated 45deg
-// ============================================================================
-const MOSAIC_SLOTS = [
-    { x: 51.7, y: 38.7, s: 27.5 }, // D5 (Large Top)
-    { x: 22.6, y: 48.3, s: 27.5 }, // D4 (Large Left)
-    { x: 76.1, y: 46.9, s: 21.0 }, // D1 (Small Right)
-    { x: 30.7, y: 68.4, s: 21.5 }, // D3 (Med Bottom)
-    { x: 59.5, y: 61.8, s: 27.5 }, // D2 (Large Center)
-];
 
-const MosaicPage = forwardRef(({ products, startFigNum, pageNum, isLeft, promoMap = {} }, ref) => {
-    return (
-        <div ref={ref} className="w-full h-full relative overflow-hidden flex flex-col" data-density="soft">
-            <div className="absolute inset-0 z-0" style={{ backgroundColor: COLORS.paperTint }} />
-
-            {/* Background Template */}
-            <div className="absolute inset-0 z-10 opacity-100 overflow-hidden">
-                <img src="/internosin.svg" className="w-full h-full object-fill" alt="" />
-            </div>
-
-            <PaperTexture opacity={0.1} />
-            <SpineShadow isLeft={isLeft} />
-            <PageEdgeHighlight isLeft={isLeft} />
-
-            <div className="relative z-20 w-full h-full overflow-hidden" style={{ isolation: 'isolate' }}>
-                {products.map((p, i) => {
-                    const slot = MOSAIC_SLOTS[i];
-                    if (!slot) return null;
-                    const figNum = startFigNum + i;
-                    const promo = promoMap[p.id];
-
-                    return (
-                        <div
-                            key={i}
-                            className="absolute flex items-center justify-center pointer-events-auto"
-                            style={{
-                                left: `${slot.x}%`,
-                                top: `${slot.y}%`,
-                                width: `${slot.s}%`,
-                                height: `${slot.s * (595.28 / 841.89)}%`,
-                                transform: 'translate(-50%, -50%) rotate(45deg)',
-                                overflow: 'visible',
-                                backgroundColor: 'transparent'
-                            }}
-                        >
-                            <div style={{ transform: 'rotate(-45deg)', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                                <img
-                                    src={p.image_url}
-                                    className="w-full h-full object-contain drop-shadow-lg"
-                                    alt={p.name}
-                                />
-                                {/* Fig Label Overlay */}
-                                <div className="absolute -bottom-2 -right-2 bg-white/95 px-1.5 py-0.5 rounded shadow-sm border border-slate-100/50 z-30">
-                                    <span className="text-[10px] font-black text-slate-800">FIG. {figNum}</span>
-                                </div>
-                                {/* Offer Banner — bottom of image */}
-                                {promo && (
-                                    <div className="absolute bottom-0 left-0 right-0 z-40 flex justify-center pb-2" style={{ pointerEvents: 'none' }}>
-                                        <div style={{
-                                            backgroundColor: promo.color || COLORS.primaryDeep,
-                                            color: 'white',
-                                            fontSize: '9px',
-                                            fontWeight: 900,
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '0.05em',
-                                            padding: '4px 8px',
-                                            textAlign: 'center',
-                                            lineHeight: '1.2',
-                                            fontFamily: 'Inter, sans-serif',
-                                            borderRadius: '4px',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                                            minWidth: '90px'
-                                        }}>
-                                            PRODOTTO IN OFFERTA
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            <PageFooter pageNum={pageNum} isLeft={isLeft} />
-        </div>
-    );
-});
-
-// ============================================================================
-// NEW: DETAIL PAGE (RIGHT) — Product list with Fig references
-// ============================================================================
-const DetailPage = forwardRef(({ category, products, startFigNum, pageNum, isLeft, promoMap = {} }, ref) => (
+const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promoMap = {} }, ref) => (
     <div ref={ref} className="w-full h-full relative overflow-hidden flex flex-col" data-density="soft">
-        {/* Background (same as FlipbookCatalog) */}
         <div className="absolute inset-0 z-0" style={{ backgroundColor: COLORS.paperTint }} />
         <PaperTexture opacity={0.3} />
         <SpineShadow isLeft={isLeft} />
         <PageEdgeHighlight isLeft={isLeft} />
 
         <div className="relative z-10 flex flex-col flex-1" style={{ isolation: 'isolate' }}>
-            {/* Green Header Band */}
+            {/* Green Header Band (Uniformato su entrambe le pagine) */}
             <div className="relative overflow-hidden" style={{ backgroundColor: COLORS.primaryDeep, height: 44 }}>
                 <div className="absolute right-0 top-0 h-full w-28" style={{
                     background: `linear-gradient(135deg, transparent 35%, ${COLORS.mintAccent}30 35%, ${COLORS.mintAccent}30 55%, transparent 55%)`,
@@ -399,79 +304,79 @@ const DetailPage = forwardRef(({ category, products, startFigNum, pageNum, isLef
                 </div>
             </div>
 
-            {/* Product details list — strict 5 slots */}
+            {/* Product details list — strict 6 slots */}
             <div className="flex flex-col px-5 pt-3 pb-24 h-full" style={{ height: '100%' }}>
-                {Array.from({ length: 5 }).map((_, i) => {
+                {Array.from({ length: 6 }).map((_, i) => {
                     const p = products[i];
                     if (!p) return <div key={i} className="flex-1" />; // Spacer for empty slots
 
                     const promo = promoMap[p.id];
                     return (
-                        <div key={i} className="flex flex-col justify-center relative" style={{
-                            height: '20%', // 100% / 5 = 20% strict height per slot
-                            borderBottom: i < 4 ? '1px solid #E2E8E4' : 'none',
+                        <div key={i} className="flex flex-row items-center gap-3 relative" style={{
+                            height: '16.66%', // 100% / 6 = 16.66% strict height per slot
+                            borderBottom: i < 5 ? '1px solid #E2E8E4' : 'none',
                             paddingTop: 4,
                             paddingBottom: 4,
                             overflow: 'hidden' // Prevent overflow
                         }}>
-                            {/* Fig badge + Product Name row */}
-                            <div className="flex items-start gap-3">
-                                <div className="shrink-0 flex items-center justify-center rounded-sm mt-0.5"
-                                    style={{
-                                        backgroundColor: COLORS.primaryDeep,
-                                        width: 42,
-                                        height: 20,
-                                    }}>
-                                    <span className="text-white text-[9px] font-bold tracking-wider" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                        FIG.{startFigNum + i}
-                                    </span>
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-extrabold text-gray-900 text-[12px] leading-tight uppercase tracking-tight line-clamp-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                        {p.name}
-                                    </h3>
-                                    <span className="text-[9px] font-bold uppercase tracking-wider mt-0.5 inline-block" style={{ color: COLORS.primaryDeep }}>
-                                        COD. {p.id || 'N/A'}
-                                    </span>
-                                </div>
-
-                                {/* Offer badge */}
-                                {promo && (
-                                    <div className="shrink-0 flex flex-col items-center px-2 py-1 rounded" style={{ backgroundColor: `${promo.color || COLORS.primaryDeep}20`, border: `1.5px solid ${promo.color || COLORS.primaryDeep}` }}>
-                                        <span className="text-[10px] font-black uppercase" style={{ color: promo.color || COLORS.primaryDeep }}>
-                                            {promo.discountType === 'percentage' ? `-${promo.discountValue}%` : `-€${Number(promo.discountValue).toFixed(0)}`}
-                                        </span>
-                                        {promo.validTo && (
-                                            <span className="text-[8px] font-bold" style={{ color: promo.color || COLORS.primaryDeep, opacity: 0.9 }}>
-                                                fino al {new Date(promo.validTo).toLocaleDateString('it-IT')}
-                                            </span>
-                                        )}
-                                    </div>
+                            {/* Image Container (Left) */}
+                            <div className="shrink-0 w-20 h-full max-h-20 bg-white rounded-md shadow-sm border border-slate-100 flex items-center justify-center p-1 relative">
+                                {p.image_url ? (
+                                    <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" />
+                                ) : (
+                                    <span className="text-xs text-slate-300 font-mono">No Img</span>
                                 )}
                             </div>
 
-                            {/* Description */}
-                            <p className="text-slate-500 text-[9px] leading-snug line-clamp-2 mt-1 ml-[54px] pr-2">
-                                {p.description || "Scheda tecnica disponibile su richiesta."}
-                            </p>
+                            {/* Details Container (Right) */}
+                            <div className="flex-1 flex flex-col h-full min-w-0 justify-center">
+                                <div className="flex items-start gap-2 justify-between">
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <h3 className="font-extrabold text-gray-900 text-[11px] leading-tight uppercase tracking-tight line-clamp-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+                                            {p.name}
+                                        </h3>
+                                        <span className="text-[8px] font-bold uppercase tracking-wider mt-0.5 inline-block" style={{ color: COLORS.primaryDeep }}>
+                                            COD. {p.id || 'N/A'}
+                                        </span>
+                                    </div>
 
-                            {/* Format Row (only carton) */}
-                            {p.formato_cartone && (
-                                <div className="flex items-center gap-1 mt-1 ml-[54px]">
-                                    <span className="text-[7px] font-bold text-slate-400 uppercase">Cartone:</span>
-                                    <span className="text-[8px] text-slate-600 font-semibold">{p.formato_cartone}</span>
+                                    {/* Offer badge */}
+                                    {promo && (
+                                        <div className="shrink-0 flex flex-col items-center px-1.5 py-0.5 rounded" style={{ backgroundColor: `${promo.color || COLORS.primaryDeep}20`, border: `1px solid ${promo.color || COLORS.primaryDeep}` }}>
+                                            <span className="text-[8px] font-black uppercase" style={{ color: promo.color || COLORS.primaryDeep }}>
+                                                {promo.discountType === 'percentage' ? `-${promo.discountValue}%` : `-€${Number(promo.discountValue).toFixed(0)}`}
+                                            </span>
+                                            {promo.validTo && (
+                                                <span className="text-[6px] font-bold" style={{ color: promo.color || COLORS.primaryDeep, opacity: 0.9 }}>
+                                                    fino al {new Date(promo.validTo).toLocaleDateString('it-IT')}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
-                            )}
 
-                            {/* Price row */}
-                            <div className="flex items-center justify-between mt-auto ml-[54px] pr-1 pt-1 border-t border-slate-100">
-                                <span className="text-slate-300 text-[8px] font-medium uppercase tracking-wide">
-                                    Cad.{p.unita_vendita ? ` (${p.unita_vendita})` : ''}
-                                </span>
-                                <span className="font-black text-[15px] tracking-tight" style={{ color: COLORS.primaryDeep, fontFamily: 'Inter, sans-serif' }}>
-                                    {formatPrice(p.price)}
-                                </span>
+                                {/* Description */}
+                                <p className="text-slate-500 text-[8px] leading-snug line-clamp-2 mt-1 pr-2">
+                                    {p.description || "Scheda tecnica disponibile su richiesta."}
+                                </p>
+
+                                {/* Format Row (only carton) */}
+                                {p.formato_cartone && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                        <span className="text-[7px] font-bold text-slate-400 uppercase">Cartone:</span>
+                                        <span className="text-[7px] text-slate-600 font-semibold">{p.formato_cartone}</span>
+                                    </div>
+                                )}
+
+                                {/* Price row */}
+                                <div className="flex items-center justify-between mt-auto pr-1 pt-1">
+                                    <span className="text-slate-300 text-[8px] font-medium uppercase tracking-wide">
+                                        Cad.{p.unita_vendita ? ` (${p.unita_vendita})` : ''}
+                                    </span>
+                                    <span className="font-black text-[13px] tracking-tight" style={{ color: COLORS.primaryDeep, fontFamily: 'Inter, sans-serif' }}>
+                                        {formatPrice(p.price)}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     );
@@ -648,7 +553,7 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
     const promoMap = buildPromoMap(activePromotions);
     console.log('[Catalog] promoMap:', promoMap, 'activePromotions:', activePromotions.length);
 
-    // Build SPREADS: products per spread (MosaicPage left + DetailPage right)
+    // Build PAGES: products per page (ProductListPage)
     const categoryMap = {};
     items.forEach(item => {
         const cat = item.category || "Prodotti";
@@ -661,7 +566,7 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
     //   Page 1: Cover (right, alone)
     //   WITH promos:  Page 2 (left): PromoPage  |  Page 3 (right): IndexPage  ← one spread
     //   WITHOUT promos: Page 2 (left): IndexPage | Page 3 (right): BlankPage  ← one spread
-    //   Page 4+ (left): MosaicPage  |  Page 5+ (right): DetailPage  ← content spreads
+    //   Page 4+ : ProductListPage (6 products per page, sequential)
     //   Last page: BackCover (left, alone — handled by showCover)
     // ========================================================================
     const needsBlank = !hasPromos; // blank only when no promo page (to keep MosaicPage on left)
@@ -669,29 +574,25 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
     const indexPageNum = hasPromos ? 3 : 2;
     const blankPageNum = needsBlank ? 3 : null;
 
-    // Content always starts on page 4 (left side)
-    let spreadPageCounter = 4;
+    // Content always starts on page 4
+    let pageCounter = 4;
     const categoryIndex = [];
-    const spreads = [];
-    let globalFigNum = 1;
+    const internalPages = [];
 
     Object.entries(categoryMap).forEach(([cat, list]) => {
-        categoryIndex.push({ name: cat, page: spreadPageCounter });
-        for (let i = 0; i < list.length; i += 5) {
-            const chunk = list.slice(i, i + 5);
-            spreads.push({
+        categoryIndex.push({ name: cat, page: pageCounter });
+        for (let i = 0; i < list.length; i += 6) {
+            const chunk = list.slice(i, i + 6);
+            internalPages.push({
                 category: cat,
                 products: chunk,
-                figStartNum: globalFigNum,
-                leftPageNum: spreadPageCounter,
-                rightPageNum: spreadPageCounter + 1,
+                pageNum: pageCounter,
             });
-            globalFigNum += chunk.length;
-            spreadPageCounter += 2;
+            pageCounter += 1;
         }
     });
 
-    const totalPages = spreadPageCounter; // spreadPageCounter ends at back cover page
+    const totalPages = pageCounter; // pageCounter ends at back cover page
 
     const onFlip = (e) => {
         setCurrentPage(e.data);
@@ -904,17 +805,19 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                 drawFooter(null, false, false);
             }
 
-            // CONTENT SPREADS
-            for (const spread of spreads) {
-                // --- LEFT PAGE (Mosaic) — always left ---
+            // CONTENT PAGES (Sequential, replacing Left Mosaic & Right Detail)
+            for (const page of internalPages) {
+                const isLeft = page.pageNum % 2 === 0;
+
                 doc.addPage();
                 drawBackground();
-                drawGeometricBackground(spread.leftPageNum, true);
+                drawGeometricBackground(page.pageNum, isLeft);
 
                 // Green header band
+                const cPrimary = PDF_COLORS.primaryDeep;
+                const cMint = PDF_COLORS.mintAccent;
                 doc.setFillColor(cPrimary.r, cPrimary.g, cPrimary.b);
                 doc.rect(0, 0, W, 18, 'F');
-                const cMint = PDF_COLORS.mintAccent;
                 doc.setFillColor(cMint.r, cMint.g, cMint.b);
                 doc.setGState(new doc.GState({ opacity: 0.15 }));
                 doc.triangle(W - 35, 0, W - 15, 0, W - 25, 18, 'F');
@@ -924,136 +827,66 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                 doc.setFontSize(10);
                 doc.setTextColor(255, 255, 255);
                 doc.setFont("helvetica", "bold");
-                doc.text(spread.category.toUpperCase(), 15, 12);
+                doc.text(page.category.toUpperCase(), 15, 12);
                 doc.setFontSize(7);
                 doc.text("CATALOGO", W - 15, 12, { align: 'right' });
 
-                // Decorative rects
-                const decoRects = [
-                    { x: 8, y: 22, w: 20, h: 35 },
-                    { x: W - 30, y: 55, w: 18, h: 28 },
-                    { x: 15, y: H - FOOTER_HEIGHT - 55, w: 28, h: 15 },
-                    { x: W - 45, y: 25, w: 12, h: 40 },
-                ];
-                decoRects.forEach((r, i) => {
-                    const col = i % 2 === 0 ? cPrimary : cMint;
-                    doc.setFillColor(col.r, col.g, col.b);
-                    doc.setGState(new doc.GState({ opacity: 0.15 }));
-                    doc.rect(r.x, r.y, r.w, r.h, 'F');
-                    doc.setGState(new doc.GState({ opacity: 1 }));
-                });
+                // Product rows (up to 6 slots)
+                const startY = 24;
+                const maxY = H - FOOTER_HEIGHT - 6;
+                const availableHeight = maxY - startY;
+                const rowHeight = availableHeight / 6; // Space for 6 items
 
-                // Precise mapping from internosin.svg (ViewBox 595.28 x 841.89)
-                // Converting SVG units to mm: SVG_UNIT * (210 / 595.28)
-                const toMM = (svgVal) => svgVal * (210 / 595.28);
-                const bgRes = await getDataUrl("/internosin.svg", 2480, 3508);
-                if (bgRes?.data) {
-                    doc.addImage(bgRes.data, 'PNG', 0, 0, W, H, undefined, 'FAST');
-                }
+                for (let j = 0; j < page.products.length; j++) {
+                    const p = page.products[j];
+                    const y = startY + (j * rowHeight);
 
-                const diamondPositions = [
-                    // Mapped Coords (SVG center x, cy, and size in units)
-                    { cx: toMM(307.8), cy: toMM(325.6), s: toMM(164) }, // D5
-                    { cx: toMM(134.6), cy: toMM(406.6), s: toMM(164) }, // D4
-                    { cx: toMM(447.9), cy: toMM(389.7), s: toMM(125) }, // D1
-                    { cx: toMM(182.5), cy: toMM(576.1), s: toMM(128) }, // D3
-                    { cx: toMM(354.2), cy: toMM(520.2), s: toMM(164) }, // D2
-                ];
+                    // Row background/border
+                    if (j < 5) { // Add separator line for all but the last item
+                        doc.setDrawColor(226, 232, 228); // #E2E8E4
+                        doc.setLineWidth(0.2);
+                        doc.line(12, y + rowHeight - 1, W - 12, y + rowHeight - 1);
+                    }
 
-                for (let j = 0; j < spread.products.length && j < 5; j++) {
-                    const p = spread.products[j];
-                    const dp = diamondPositions[j];
-                    const s = dp.s;
+                    // 1) Image box (left side of the row)
+                    const imgBoxSize = 25;
+                    const imgBoxX = 12;
+                    const imgBoxY = y + 2;
 
-                    // Image with transparency (Contain logic)
+                    doc.setDrawColor(240, 240, 240);
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(imgBoxX, imgBoxY, imgBoxSize, imgBoxSize, 1, 1, 'FD');
+
                     if (p.image_url) {
-                        const imgData = await getDataUrl(p.image_url);
-                        if (imgData?.data) {
-                            // Center on dp.cx, dp.cy
-                            // We want to fit the image INSIDE the rotated square
-                            const imgS = s;
-                            const x = dp.cx - imgS / 2;
-                            const y = dp.cy - imgS / 2;
-
-                            // Standard doc.addImage uses x, y (top-left)
-                            doc.addImage(imgData.data, 'PNG', x, y, imgS, imgS, undefined, 'FAST');
+                        try {
+                            const imgData = await getDataUrl(p.image_url);
+                            if (imgData?.data) {
+                                // Add image centered inside the box (approx 2mm padding)
+                                doc.addImage(imgData.data, 'PNG', imgBoxX + 2, imgBoxY + 2, imgBoxSize - 4, imgBoxSize - 4, undefined, 'FAST');
+                            }
+                        } catch (err) {
+                            console.error("PDF image load error:", err);
                         }
                     }
 
-                    // Fig label (Precise offset)
-                    doc.setFillColor(cPrimary.r, cPrimary.g, cPrimary.b);
-                    const labelX = dp.cx + s * 0.25;
-                    const labelY = dp.cy + s * 0.25;
-                    doc.rect(labelX, labelY, 15, 5, 'F');
-                    doc.setFontSize(6);
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFont("helvetica", "bold");
-                    doc.text(`FIG.${spread.figStartNum + j}`, labelX + 1.5, labelY + 3.5);
-                }
+                    // 2) Content bounds
+                    const textStartX = imgBoxX + imgBoxSize + 4; // Right of the image box
+                    let currentY = imgBoxY + 3;
 
-                drawFooter(spread.leftPageNum, true);
-
-                // --- RIGHT PAGE (Detail list) — always right ---
-                doc.addPage();
-                drawBackground();
-                drawGeometricBackground(spread.rightPageNum, false);
-
-                // Green header band
-                doc.setFillColor(cPrimary.r, cPrimary.g, cPrimary.b);
-                doc.rect(0, 0, W, 18, 'F');
-                doc.setFillColor(cMint.r, cMint.g, cMint.b);
-                doc.setGState(new doc.GState({ opacity: 0.15 }));
-                doc.triangle(W - 35, 0, W - 15, 0, W - 25, 18, 'F');
-                doc.triangle(W - 20, 0, W, 0, W - 10, 18, 'F');
-                doc.setGState(new doc.GState({ opacity: 1 }));
-
-                doc.setFontSize(10);
-                doc.setTextColor(255, 255, 255);
-                doc.setFont("helvetica", "bold");
-                doc.text(spread.category.toUpperCase(), 15, 12);
-                doc.setFontSize(7);
-                doc.text("CATALOGO", W - 15, 12, { align: 'right' });
-
-                // Products list
-                const startY = 26;
-                const maxY = H - FOOTER_HEIGHT - 8;
-                const availableHeight = maxY - startY;
-                const rowHeight = availableHeight / 5; // Fixed division by 5 as requested
-
-                for (let j = 0; j < spread.products.length; j++) {
-                    const p = spread.products[j];
-                    const y = startY + (j * rowHeight);
-                    // No break needed, we assume 5 items max per page
-
-                    // Fig badge
-                    doc.setFillColor(cPrimary.r, cPrimary.g, cPrimary.b);
-                    doc.rect(12, y + 2, 17, 6, 'F');
-                    doc.setFontSize(7);
-                    doc.setTextColor(255, 255, 255);
-                    doc.setFont("helvetica", "bold");
-                    doc.text(`FIG.${spread.figStartNum + j}`, 13.5, y + 6);
-
-                    // Product name (bigger)
-                    doc.setFontSize(11);
+                    // Product Name
+                    doc.setFontSize(10);
                     doc.setTextColor(25, 25, 25);
                     doc.setFont("helvetica", "bold");
-                    const nameLines = doc.splitTextToSize(p.name.toUpperCase(), 100);
-                    doc.text(nameLines.slice(0, 2), 32, y + 7);
+                    const nameLines = doc.splitTextToSize(p.name.toUpperCase(), W - textStartX - 40); // Leave space for promo
+                    doc.text(nameLines.slice(0, 2), textStartX, currentY);
 
-                    // Code (bigger)
-                    const codeY = y + 7 + (nameLines.length > 1 ? 7 : 4.5);
-                    doc.setFontSize(8);
-                    doc.setTextColor(cPrimary.r, cPrimary.g, cPrimary.b);
-                    doc.setFont("helvetica", "bold");
-                    doc.text(`COD. ${p.id || 'N/A'}`, 32, codeY);
-
-                    // Offer badge with expiry (if product is in an active promo)
+                    // Promo Badge
                     const productPromo = promoMap[p.id];
                     if (productPromo) {
                         const badgeText = productPromo.discountType === 'percentage'
                             ? `-${productPromo.discountValue}%`
                             : `-€${Number(productPromo.discountValue).toFixed(0)}`;
-                        // Use promo color
+
                         const pc = productPromo.color || null;
                         if (pc) {
                             const r = parseInt(pc.slice(1, 3), 16), g = parseInt(pc.slice(3, 5), 16), b = parseInt(pc.slice(5, 7), 16);
@@ -1061,62 +894,64 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                         } else {
                             doc.setFillColor(cPrimary.r, cPrimary.g, cPrimary.b);
                         }
-                        doc.roundedRect(W - 48, y + 1, 24, 7, 1, 1, 'F');
-                        doc.setFontSize(9);
+
+                        doc.roundedRect(W - 32, imgBoxY, 20, 6, 1, 1, 'F');
+                        doc.setFontSize(7);
                         doc.setTextColor(255, 255, 255);
                         doc.setFont("helvetica", "bold");
-                        doc.text(badgeText, W - 36, y + 6, { align: 'center' });
-                        // Expiry date
-                        if (productPromo.validTo) {
-                            doc.setFontSize(6); // Increased from 5.5
-                            doc.setTextColor(80, 80, 80); // Darker gray (fixed value, safe)
-                            doc.setFont("helvetica", "bold"); // Bold
-                            doc.text(`fino al ${new Date(productPromo.validTo).toLocaleDateString('it-IT')}`, W - 36, y + 11, { align: 'center' });
-                        }
+                        doc.text(badgeText, W - 22, imgBoxY + 4.5, { align: 'center' });
                     }
 
-                    // Description (bigger)
-                    let detailY = codeY + 4;
-                    if (p.description) {
-                        doc.setFontSize(8);
-                        doc.setTextColor(100, 100, 100);
-                        doc.setFont("helvetica", "normal");
-                        const descLines = doc.splitTextToSize(p.description, 105);
-                        doc.text(descLines.slice(0, 2), 32, detailY);
-                        detailY += descLines.slice(0, 2).length * 3.5;
-                    }
+                    currentY += (nameLines.length > 1 ? 7.5 : 4);
 
-                    // Carton format (No extended_description/specs as requested)
-                    if (p.formato_cartone) {
-                        doc.setFontSize(6.5);
-                        doc.setTextColor(130, 130, 130);
-                        doc.setFont("helvetica", "bold");
-                        doc.text("Cartone: ", 32, detailY + 3);
-                        doc.setFont("helvetica", "normal");
-                        doc.text(p.formato_cartone, 48, detailY + 3);
-                    }
-
-                    // Price
-                    // Price (Moved to bottom of row to match visible design and avoid overlap)
-                    doc.setFontSize(7);
-                    doc.setTextColor(160, 160, 160);
-                    doc.setFont("helvetica", "normal");
-                    doc.text(`Cad.${p.unita_vendita ? ` (${p.unita_vendita})` : ''}`, W - 20, y + rowHeight - 10, { align: 'right' });
-
-                    doc.setFontSize(13);
+                    // Code
+                    doc.setFontSize(7.5);
                     doc.setTextColor(cPrimary.r, cPrimary.g, cPrimary.b);
                     doc.setFont("helvetica", "bold");
-                    doc.text(formatPrice(p.price), W - 20, y + rowHeight - 5, { align: 'right' });
+                    doc.text(`COD. ${p.id || 'N/A'}`, textStartX, currentY);
 
-                    // Separator
-                    if (j < 4) { // Draw lines for first 4 items, 5th doesn't need
-                        doc.setDrawColor(225, 230, 227);
-                        doc.setLineWidth(0.2);
-                        doc.line(15, y + rowHeight - 2, W - 15, y + rowHeight - 2);
+                    currentY += 4;
+
+                    // Description
+                    if (p.description) {
+                        doc.setFontSize(7.5);
+                        doc.setTextColor(110, 110, 110);
+                        doc.setFont("helvetica", "normal");
+                        const descLines = doc.splitTextToSize(p.description, W - textStartX - 15);
+                        doc.text(descLines.slice(0, 2), textStartX, currentY);
+                        currentY += descLines.slice(0, 2).length * 3.5;
                     }
+
+                    currentY += 1.5;
+
+                    // Carton format
+                    if (p.formato_cartone) {
+                        doc.setFontSize(6.5);
+                        doc.setTextColor(150, 150, 150);
+                        doc.setFont("helvetica", "bold");
+                        doc.text("Cartone: ", textStartX, currentY);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(p.formato_cartone, textStartX + 14, currentY);
+                        currentY += 3.5;
+                    }
+
+                    // Price & Unit (Bottom aligned within the row bounds)
+                    const priceY = imgBoxY + imgBoxSize - 1;
+
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(160, 160, 160);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(`Cad.${p.unita_vendita ? ` (${p.unita_vendita})` : ''}`, textStartX, priceY);
+
+                    // Price (Right aligned)
+                    doc.setFontSize(12);
+                    doc.setTextColor(cPrimary.r, cPrimary.g, cPrimary.b);
+                    doc.setFont("helvetica", "bold");
+                    const pText = formatPrice(p.price);
+                    doc.text(pText, W - 12, priceY, { align: 'right' });
                 }
 
-                drawFooter(spread.rightPageNum, false);
+                drawFooter(page.pageNum, isLeft);
             }
 
 
@@ -1238,27 +1073,17 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                             <BlankPage key="blank" isLeft={false} />,
                         ]),
 
-                        // 4+. Content Spreads: MosaicPage (left, even) + DetailPage (right, odd)
-                        ...spreads.flatMap((spread, i) => [
-                            <MosaicPage
-                                key={`mosaic-${i}`}
-                                category={spread.category}
-                                products={spread.products}
-                                startFigNum={spread.figStartNum}
-                                pageNum={spread.leftPageNum}
-                                isLeft={true}
+                        // 4+. Content Pages: ProductListPage (left and right alternating)
+                        ...internalPages.map((page, i) => (
+                            <ProductListPage
+                                key={`page-${i}`}
+                                category={page.category}
+                                products={page.products}
+                                pageNum={page.pageNum}
+                                isLeft={page.pageNum % 2 === 0} // Even pages are left, odd are right
                                 promoMap={promoMap}
-                            />,
-                            <DetailPage
-                                key={`detail-${i}`}
-                                category={spread.category}
-                                products={spread.products}
-                                startFigNum={spread.figStartNum}
-                                pageNum={spread.rightPageNum}
-                                isLeft={false}
-                                promoMap={promoMap}
-                            />,
-                        ]),
+                            />
+                        )),
 
                         // Last. Back Cover (left — showCover renders it alone)
                         <BackCover key="back-cover" />,

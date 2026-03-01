@@ -62,6 +62,7 @@ const useStore = create((set, get) => ({
                 const timestamp = Date.now();
                 const normalizedData = data.map(p => ({
                     id: p.codice_articolo,
+                    code: p.codice_articolo, // Add code field explicitly for search
                     _dbId: p.id, // Keep the numeric DB id for updates
                     name: p.descrizione || '',
                     description: p.specifiche || '',

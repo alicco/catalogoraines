@@ -43,7 +43,8 @@ export function Warehouse() {
     const displayedItems = inventory.filter(item => {
         if (isSearchActive) {
             return item.name.toLowerCase().includes(search.toLowerCase()) ||
-                (item.description && item.description.toLowerCase().includes(search.toLowerCase()));
+                (item.description && item.description.toLowerCase().includes(search.toLowerCase())) ||
+                (item.code && item.code.toLowerCase().includes(search.toLowerCase()));
         }
         if (isCategorySelected) {
             return (item.category || 'Altro') === selectedCategory;

@@ -1,0 +1,31 @@
+
+> aisac-v2@0.0.0 build
+> vite build
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 37 modules transformed.
+Ô£ù Build failed in 371ms
+error during build:
+[vite:esbuild] Transform failed with 1 error:
+C:/Users/forza/Documents/Raines1.0/src/components/ProductEditor.jsx:433:4: ERROR: Unexpected ")"
+file: C:/Users/forza/Documents/Raines1.0/src/components/ProductEditor.jsx:433:4
+
+Unexpected ")"
+431 |      );
+432 |  }
+433 |      );
+    |      ^
+434 |  }
+435 |  
+
+    at failureErrorWithLog (C:\Users\forza\Documents\Raines1.0\node_modules\esbuild\lib\main.js:1467:15)
+    at C:\Users\forza\Documents\Raines1.0\node_modules\esbuild\lib\main.js:736:50
+    at responseCallbacks.<computed> (C:\Users\forza\Documents\Raines1.0\node_modules\esbuild\lib\main.js:603:9)
+    at handleIncomingPacket (C:\Users\forza\Documents\Raines1.0\node_modules\esbuild\lib\main.js:658:12)
+    at Socket.readFromStdout (C:\Users\forza\Documents\Raines1.0\node_modules\esbuild\lib\main.js:581:7)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)

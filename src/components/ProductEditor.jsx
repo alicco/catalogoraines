@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogActions, Button, TextField } from '@mui/material';
+import { Dialog, DialogContent, DialogTitle, DialogActions, Button, TextField, IconButton, Tooltip } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import useStore from '../lib/store';
 import { supabase } from '../lib/supabaseClient';
 
@@ -38,7 +40,7 @@ export function ProductEditor() {
 
     useEffect(() => {
         const handleNew = () => {
-            setFormData({ id: '', name: '', description: '', extended_description: '', price: '', category: 'Altro', image: '', image_url: '', emoji: '📦', subtitle: '', packaging: '' });
+            setFormData({ id: '', name: '', description: '', extended_description: '', price: '', category: 'Altro', image: '', image_url: '', emoji: '📦', subtitle: '', packaging: '', iva: '22', formato_cartone: '', unita_vendita: 'PZ', costo_al_metro: '' });
             setIsEditing(false);
             setOpen(true);
         };
@@ -192,151 +194,238 @@ export function ProductEditor() {
         }
     };
 
+    const handleDeleteImage = () => {
+        setFormData(prev => ({
+            ...prev,
+            image: '',
+            image_url: ''
+        }));
+    };
+
     return (
-        <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth>
-            <DialogTitle style={{ backgroundColor: '#1e3a52', color: 'white' }}>
-                {isEditing ? 'Modifica Prodotto' : 'Nuovo Prodotto'}
+        <Dialog
+            open={open}
+            onClose={() => setOpen(false)}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+                className: "rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+            }}
+        >
+            <DialogTitle className="bg-green-dark text-white p-6 flex items-center justify-between">
+                <div className="flex flex-col">
+                    <span className="text-xl font-black uppercase tracking-tight">
+                        {isEditing ? 'Modifica Prodotto' : 'Nuovo Prodotto'}
+                    </span>
+                    <span className="text-[10px] text-green-light/60 font-bold uppercase tracking-widest">
+                        Technical Item Editor
+                    </span>
+                </div>
             </DialogTitle>
-            <DialogContent className="flex flex-col gap-4 pt-4">
 
-                {/* Spacer requested by user */}
-                <div style={{ height: '30px' }}></div>
+            <DialogContent className="bg-paper p-6 flex flex-col gap-6 custom-scrollbar">
 
-                <TextField
-                    className="mt-2"
-                    label="Codice Articolo (OBBLIGATORIO PER INIZIARE)"
-                    name="id"
-                    value={formData.id}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={isEditing}
-                    helperText={isEditing ? "Non modificabile" : "Inserisci PRIMA il codice per sbloccare il resto"}
-                    color={!formData.id ? "warning" : "success"}
-                    focused={!formData.id && !isEditing}
-                />
+                {/* ID and Basic Info */}
+                <div className="pt-4 grid grid-cols-1 gap-4">
+                    <TextField
+                        label="Codice Articolo"
+                        name="id"
+                        value={formData.id}
+                        onChange={handleChange}
+                        fullWidth
+                        disabled={isEditing}
+                        placeholder="es. A1001"
+                        variant="outlined"
+                        InputProps={{
+                            className: "bg-white font-black text-green-dark"
+                        }}
+                        sx={{
+                            '& label.Mui-focused': { color: '#2E5C45' },
+                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                        }}
+                    />
 
-                <TextField
-                    className="mt-2"
-                    label="Nome Prodotto (Principal)"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    fullWidth
-                    variant="filled"
-                    sx={{ backgroundColor: 'white', borderRadius: '8px' }}
-                />
+                    <TextField
+                        label="Nome Prodotto"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        fullWidth
+                        variant="outlined"
+                        InputProps={{
+                            className: "bg-white font-bold"
+                        }}
+                        sx={{
+                            '& label.Mui-focused': { color: '#2E5C45' },
+                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                        }}
+                    />
+                </div>
 
-                <div className={`flex flex-col gap-4 transition-opacity duration-300 ${!formData.id ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
-                    {/* Image Upload Area */}
-                    <div
-                        className={`w-full h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors relative overflow-hidden ${dragActive ? 'border-teal bg-teal/10' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
-                        onDragEnter={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDragOver={handleDrag}
-                        onDrop={handleDrop}
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        {formData.image ? (
-                            <div className="relative w-full h-full group">
-                                <img src={formData.image} alt="Preview" className="w-full h-full object-contain" />
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="text-white font-medium">Cambia Immagine</span>
+                <div className={`flex flex-col gap-6 transition-all duration-300 ${!formData.id ? 'opacity-40 pointer-events-none grayscale' : 'opacity-100'}`}>
+
+                    {/* Image Area */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-green-dark/40 uppercase tracking-widest ml-1">Immagine Prodotto</label>
+                        <div
+                            className={`group relative w-full h-52 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden bg-white/50 backdrop-blur-sm shadow-inner ${dragActive ? 'border-green-dark bg-green-light/10' : 'border-green-dark/20 hover:border-green-dark/40'}`}
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            {formData.image ? (
+                                <>
+                                    <img src={formData.image} alt="Preview" className="w-full h-full object-contain p-4 drop-shadow-md" />
+                                    <div className="absolute inset-0 bg-green-dark/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <CloudUploadIcon className="text-white w-10 h-10" />
+                                            <span className="text-white text-xs font-black uppercase tracking-widest">Sostituisci</span>
+                                        </div>
+                                    </div>
+                                    {/* Delete Button */}
+                                    <Tooltip title="Elimina Immagine">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteImage();
+                                            }}
+                                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg hover:bg-red-600 active:scale-90 transition-all z-10"
+                                        >
+                                            <DeleteIcon fontSize="small" />
+                                        </button>
+                                    </Tooltip>
+                                </>
+                            ) : (
+                                <div className="text-center p-6 flex flex-col items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-green-dark/5 flex items-center justify-center group-hover:bg-green-dark/10 transition-colors">
+                                        <CloudUploadIcon className="text-green-dark/40" fontSize="large" />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-sm font-bold text-green-dark/60">Trascina o clicca per caricare</span>
+                                        <span className="text-[9px] text-green-dark/30 uppercase font-black tracking-widest">Target: {formData.id}_v2.png</span>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            <div className="text-center p-4 text-gray-500">
-                                <p className="font-bold">Clicca o Trascina immagine</p>
-                                <p className="text-xs mt-1">Verrà salvata come: <b>{formData.id || '...'}</b></p>
-                            </div>
-                        )}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleFileChange}
+                            )}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <TextField
+                            label="Descrizione Breve"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            fullWidth
+                            multiline
+                            rows={2}
+                            sx={{
+                                '& label.Mui-focused': { color: '#2E5C45' },
+                                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                            }}
+                        />
+
+                        <TextField
+                            label="Descrizione Estesa"
+                            name="extended_description"
+                            value={formData.extended_description}
+                            onChange={handleChange}
+                            fullWidth
+                            multiline
+                            rows={4}
+                            sx={{
+                                '& label.Mui-focused': { color: '#2E5C45' },
+                                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                            }}
                         />
                     </div>
 
-                    <TextField
-                        label="Descrizione Breve (Sottotitolo)"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        fullWidth
-                        multiline
-                        rows={2}
-                    />
+                    {/* Technical Specs Panel */}
+                    <div className="panel-inset p-5 rounded-2xl flex flex-col gap-5 border border-white/20">
+                        <div className="flex items-center gap-3 border-b border-green-dark/10 pb-3">
+                            <span className="text-[10px] font-black text-green-dark/40 uppercase tracking-widest">Specifiche Tecniche</span>
+                        </div>
 
-                    <TextField
-                        label="Descrizione Estesa"
-                        name="extended_description"
-                        value={formData.extended_description}
-                        onChange={handleChange}
-                        fullWidth
-                        multiline
-                        rows={4}
-                        placeholder="Inserisci qui la descrizione estesa del prodotto per il catalogo..."
-                    />
-
-                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-4">
-                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-gray-200 pb-2">Dati Tecnici & Commerciali</h4>
-
-                        <div className="flex gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <TextField
                                 label="IVA (%)"
                                 name="iva"
                                 type="number"
                                 value={formData.iva}
                                 onChange={handleChange}
-                                fullWidth
-                                inputProps={{ min: 0 }}
+                                size="small"
+                                sx={{
+                                    '& label.Mui-focused': { color: '#2E5C45' },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                                }}
                             />
                             <TextField
-                                label="Unità di Vendita"
+                                label="Unità Vendita"
                                 name="unita_vendita"
                                 value={formData.unita_vendita}
                                 onChange={handleChange}
-                                fullWidth
-                                placeholder="es. PZ, MT, KG"
+                                size="small"
+                                sx={{
+                                    '& label.Mui-focused': { color: '#2E5C45' },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                                }}
                             />
                         </div>
 
-                        <div className="flex gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <TextField
                                 label="Formato Cartone"
                                 name="formato_cartone"
                                 value={formData.formato_cartone}
                                 onChange={handleChange}
-                                fullWidth
-                                placeholder="es. 12 x 1L"
+                                size="small"
+                                sx={{
+                                    '& label.Mui-focused': { color: '#2E5C45' },
+                                    '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#2E5C45' }
+                                }}
                             />
                             <TextField
-                                label="Costo al metro (€)"
-                                name="costo_al_metro"
+                                label="Prezzo Listino (€)"
+                                name="price"
                                 type="number"
-                                value={formData.costo_al_metro}
+                                value={formData.price}
                                 onChange={handleChange}
-                                fullWidth
-                                inputProps={{ min: 0, step: 0.001 }}
+                                size="small"
+                                variant="filled"
+                                InputProps={{
+                                    className: "font-black"
+                                }}
+                                sx={{
+                                    '& .MuiFilledInput-root': { backgroundColor: '#E0E8E3' }
+                                }}
                             />
                         </div>
                     </div>
                 </div>
 
             </DialogContent>
-            <DialogActions style={{ padding: '16px 24px' }}>
-                <Button onClick={() => setOpen(false)} style={{ color: '#666' }}>
+            <DialogActions className="bg-white/50 backdrop-blur-sm p-4 px-6 gap-3 border-t border-green-dark/5">
+                <Button
+                    onClick={() => setOpen(false)}
+                    className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+                >
                     Annulla
                 </Button>
-                <Button
+                <button
                     onClick={handleSave}
-                    variant="contained"
-                    style={{ backgroundColor: isFormValid() ? '#10b981' : '#ccc', color: 'white' }}
                     disabled={!isFormValid()}
+                    className={`btn-skeuo px-8 py-2.5 rounded-xl text-sm font-black transition-all ${!isFormValid() ? 'opacity-50 grayscale cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'}`}
                 >
-                    Salva
-                </Button>
+                    SALVA PRODOTTO
+                </button>
             </DialogActions>
         </Dialog>
     );

@@ -209,70 +209,101 @@ export function ProductManager() {
     ];
 
     return (
-        <div className="h-full flex flex-col bg-gray-50 p-6 overflow-hidden">
+        <div className="h-full flex flex-col bg-paper overflow-hidden">
             {/* Delete Confirmation Dialog */}
             <Dialog
                 open={deleteConfirmOpen}
                 onClose={() => setDeleteConfirmOpen(false)}
+                PaperProps={{
+                    className: "rounded-3xl card-skeuo",
+                    style: { borderRadius: '24px' }
+                }}
             >
-                <div className="p-6 text-center max-w-sm">
-                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
-                        <DeleteIcon />
+                <div className="p-8 text-center max-w-sm bg-white">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-statusRed shadow-inner">
+                        <DeleteIcon fontSize="large" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2">Eliminare questo prodotto?</h3>
-                    <p className="text-sm text-gray-500 mb-6">L'azione è irreversibile. Il prodotto verrà rimosso anche dai kit salvati se presenti.</p>
+                    <h3 className="text-xl font-black text-green-dark mb-4 uppercase tracking-tight">Eliminare Prodotto?</h3>
+                    <p className="text-sm text-green-mid font-medium mb-8 leading-relaxed">Questa azione è irreversibile. Il prodotto verrà rimosso permanentemente dal catalogo.</p>
 
-                    <div className="flex gap-3 justify-center">
-                        <Button
-                            variant="outlined"
+                    <div className="flex gap-4 justify-center">
+                        <button
                             onClick={() => setDeleteConfirmOpen(false)}
-                            style={{ borderColor: '#e2e8f0', color: '#64748b' }}
+                            className="flex-1 py-3 px-6 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all uppercase text-xs tracking-widest"
                         >
                             Annulla
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="error"
+                        </button>
+                        <button
                             onClick={confirmDelete}
-                            disableElevation
+                            className="flex-1 py-3 px-6 rounded-xl btn-skeuo-red font-bold transition-all uppercase text-xs tracking-widest shadow-lg active:scale-95"
                         >
                             Elimina
-                        </Button>
+                        </button>
                     </div>
                 </div>
             </Dialog>
 
-            {/* Toolbar */}
-            <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm">
+            {/* Unified Header */}
+            <header className="bg-green-dark text-white p-4 lg:px-8 flex items-center justify-between shadow-md z-30 shrink-0">
                 <div className="flex items-center gap-4">
-                    <Button
+                    <button
                         onClick={() => setView('kit')}
-                        variant="outlined"
-                        style={{ borderColor: '#1e6b69', color: '#1e6b69' }}
+                        className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all border border-white/20 flex items-center gap-2 text-sm font-bold"
+                        title="Torna al Catalogo Principale"
                     >
-                        ← Torna al Kit
-                    </Button>
-                    <h1 className="text-2xl font-bold text-gray-800">Gestione Prodotti</h1>
-                    <span className="bg-teal/10 text-teal px-3 py-1 rounded-full text-sm font-bold">
-                        {filteredInventory.length} / {inventory.length} Articoli
-                    </span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        INDIETRO
+                    </button>
+                    <div className="h-8 w-px bg-white/20 mx-2 hidden lg:block"></div>
+                    <div>
+                        <h1 className="text-xl font-bold tracking-tight">Gestione Prodotti</h1>
+                        <p className="text-green-light/60 text-[10px] uppercase tracking-widest font-bold -mt-0.5">Editing Inventario Raines</p>
+                    </div>
                 </div>
 
-                <div className="flex gap-3 items-center">
-                    {/* Category Filter */}
-                    <FormControl size="small" sx={{ minWidth: 180 }}>
-                        <InputLabel>Categoria</InputLabel>
+                <div className="flex gap-4 items-center">
+                    <span className="hidden lg:flex bg-white/10 text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase">
+                        {filteredInventory.length} Articoli Caricati
+                    </span>
+                    <button
+                        onClick={handleNew}
+                        className="btn-skeuo px-6 py-2 rounded-lg text-sm font-black flex items-center gap-2 shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+                    >
+                        <AddIcon className="w-5 h-5" />
+                        NUOVO ARTICOLO
+                    </button>
+                </div>
+            </header>
+
+            {/* Sub-toolbar for filters and csv actions */}
+            <div className="bg-white/50 backdrop-blur-sm border-b border-green-primary/10 p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <FormControl size="small" variant="outlined" sx={{
+                        minWidth: 200,
+                        '& .MuiOutlinedInput-root': {
+                            backgroundColor: 'white',
+                            borderRadius: '12px',
+                            '& fieldset': { borderColor: '#d1d9d4' },
+                            '&:hover fieldset': { borderColor: '#5D8C71' },
+                        }
+                    }}>
+                        <InputLabel sx={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#5D8C71' }}>FILTRA PER CATEGORIA</InputLabel>
                         <Select
                             value={selectedCategory}
-                            label="Categoria"
+                            label="FILTRA PER CATEGORIA"
                             onChange={(e) => setSelectedCategory(e.target.value)}
-                            sx={{ fontSize: '0.875rem' }}
+                            sx={{ fontSize: '0.875rem', fontWeight: 'bold' }}
                         >
                             {(categories || ['All']).map(cat => (
-                                <MenuItem key={cat} value={cat}>{cat === 'All' ? 'Tutte le categorie' : cat}</MenuItem>
+                                <MenuItem key={cat} value={cat} sx={{ fontWeight: 'bold', fontSize: '13px' }}>
+                                    {cat === 'All' ? 'Tutte le categorie' : cat.toUpperCase()}
+                                </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
+                </div>
+
+                <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
                     <input
                         type="file"
                         accept=".csv"
@@ -280,66 +311,86 @@ export function ProductManager() {
                         style={{ display: 'none' }}
                         onChange={handleImportFile}
                     />
-                    <Button
-                        startIcon={<FileUploadIcon />}
+                    <button
                         onClick={handleImportClick}
-                        style={{ color: '#1e6b69', borderColor: '#1e6b69' }}
-                        variant="outlined"
+                        className="flex-1 md:flex-none flex items-center gap-2 px-4 py-2 rounded-xl bg-white border-2 border-green-mid/20 text-green-dark text-xs font-black hover:bg-green-light/20 transition-all border-dashed"
                     >
-                        Importa CSV
-                    </Button>
-                    <Button
-                        startIcon={<FileDownloadIcon />}
+                        <FileUploadIcon className="w-4 h-4" /> IMPORTA CSV
+                    </button>
+                    <button
                         onClick={handleExport}
-                        style={{ color: '#666' }}
+                        className="flex-1 md:flex-none flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 text-gray-500 text-xs font-black hover:bg-gray-50 transition-all"
                     >
-                        Esporta CSV
-                    </Button>
-                    <Button
-                        startIcon={<AddIcon />}
-                        variant="contained"
-                        onClick={handleNew}
-                        style={{ backgroundColor: '#1e6b69', color: 'white' }}
-                    >
-                        Nuovo Prodotto
-                    </Button>
+                        <FileDownloadIcon className="w-4 h-4" /> ESPORTA
+                    </button>
                 </div>
             </div>
 
-            {/* DataGrid */}
-            <div className="flex-1 bg-white rounded-xl shadow-md overflow-hidden" style={{ width: '100%' }}>
-                <DataGrid
-                    rows={filteredInventory}
-                    columns={columns}
-                    initialState={{
-                        pagination: {
-                            paginationModel: { pageSize: 25, page: 0 },
-                        },
-                    }}
-                    pageSizeOptions={[25, 50, 100]}
-                    checkboxSelection
-                    disableRowSelectionOnClick
-                    density="comfortable"
-                    slots={{ toolbar: GridToolbar }}
-                    slotProps={{
-                        toolbar: {
-                            showQuickFilter: true,
-                            quickFilterProps: { debounceMs: 500 },
-                        },
-                    }}
-                    sx={{
-                        border: 0,
-                        '& .MuiDataGrid-cell': {
-                            borderBottom: '1px solid #f0f0f0',
-                        },
-                        '& .MuiDataGrid-columnHeaders': {
-                            backgroundColor: '#f8fafc',
-                            color: '#475569',
-                            fontWeight: 'bold',
-                        },
-                    }}
-                />
-            </div>
+            {/* DataGrid Area */}
+            <main className="flex-1 p-4 lg:p-6 overflow-hidden">
+                <div className="h-full bg-white card-skeuo rounded-2xl overflow-hidden shadow-xl" style={{ width: '100%' }}>
+                    <DataGrid
+                        rows={filteredInventory}
+                        columns={columns}
+                        initialState={{
+                            pagination: {
+                                paginationModel: { pageSize: 25, page: 0 },
+                            },
+                        }}
+                        pageSizeOptions={[25, 50, 100]}
+                        checkboxSelection
+                        disableRowSelectionOnClick
+                        density="comfortable"
+                        slots={{ toolbar: GridToolbar }}
+                        slotProps={{
+                            toolbar: {
+                                showQuickFilter: true,
+                                quickFilterProps: {
+                                    debounceMs: 500,
+                                    placeholder: 'CERCA ARTICOLO...',
+                                    sx: {
+                                        padding: '10px 20px',
+                                        '& input': {
+                                            fontWeight: 'bold',
+                                            fontSize: '14px',
+                                            color: '#1E3F2F'
+                                        }
+                                    }
+                                },
+                            },
+                        }}
+                        sx={{
+                            border: 0,
+                            fontFamily: 'Inter, sans-serif',
+                            '& .MuiDataGrid-cell': {
+                                borderBottom: '1px solid #f0f3f1',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                            },
+                            '& .MuiDataGrid-columnHeader': {
+                                backgroundColor: '#F8FAF9',
+                                color: '#5D8C71',
+                                fontWeight: '800',
+                                textTransform: 'uppercase',
+                                fontSize: '11px',
+                                letterSpacing: '0.05em',
+                                borderBottom: '2px solid #E0E8E3',
+                            },
+                            '& .MuiDataGrid-row:hover': {
+                                backgroundColor: '#f5f7f6',
+                            },
+                            '& .MuiDataGrid-footerContainer': {
+                                borderTop: '2px solid #E0E8E3',
+                                backgroundColor: '#F8FAF9',
+                            },
+                            '& .MuiDataGrid-selectedRowCount': {
+                                fontWeight: 'black',
+                                color: '#2E5C45'
+                            }
+                        }}
+                    />
+                </div>
+            </main>
         </div>
     );
 }

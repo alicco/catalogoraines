@@ -5,7 +5,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
     ports:
-      - "3000:80"
+      - "8090:80"
     restart: unless-stopped
     container_name: raines-catalog
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+  raines-server:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile
+    ports:
+      - "8091:5000"
+    restart: unless-stopped
+    container_name: raines-server

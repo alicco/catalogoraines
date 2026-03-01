@@ -19,6 +19,7 @@ import { ProductManager } from './components/ProductManager';
 import { QuoteManager } from './components/QuoteManager';
 import { PromoManager } from './components/PromoManager';
 import { FlipbookCatalog2 } from './components/FlipbookCatalog2';
+import { ImageAssociator } from './components/ImageAssociator';
 
 // Custom Drag Layer for preview during drag (touch only, HTML5 has native preview)
 function CustomDragLayer() {
@@ -153,6 +154,16 @@ function App() {
     return (
       <ErrorBoundary>
         <PromoManager />
+      </ErrorBoundary>
+    );
+  }
+
+  if (currentView === 'image-associator') {
+    return (
+      <ErrorBoundary>
+        <div className="h-screen w-screen bg-paper overflow-hidden flex flex-col">
+          <ImageAssociator />
+        </div>
       </ErrorBoundary>
     );
   }

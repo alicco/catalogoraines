@@ -1,0 +1,82 @@
+Loaded 68 products and 479 catalog items.
+Mapped 'IMG_0133' (name: 'Segatura Composta 25L') to 'F1128' with score 1.5 and words: {'segatura'}
+Mapped 'IMG_0134' (name: 'Aggressore 5L') to 'A1219' with score 1.5 and words: {'aggressore'}
+Mapped 'IMG_0137' (name: 'Grill Forni-Piastre 5L') to 'A1172' with score 3.5 and words: {'grill', 'forni', 'piastre'}
+Mapped 'IMG_0142' (name: 'Germol Wipes Plus') to 'A1284' with score 1.5 and words: {'plus'}
+Mapped 'IMG_0144' (name: 'Ghiaccio Istantaneo TNT') to 'D1025' with score 3.5 and words: {'tnt', 'ghiaccio', 'istantaneo'}
+Mapped 'IMG_0146' (name: 'Planet Plus 55') to 'A1284' with score 1.5 and words: {'plus'}
+Mapped 'IMG_0148' (name: 'Sacchi per Rifiuti (Bianchi)') to 'F1305' with score 2 and words: {'sacchi', 'bianchi'}
+Mapped 'IMG_0149' (name: 'Sacchi per Rifiuti (Gialli)') to 'F1426' with score 2.5 and words: {'sacchi', 'gialli'}
+Found 8 potential mappings.
+No mapping found for: A1219.JPG
+No mapping found for: F1128.JPG
+[DRY-RUN] Will rename: IMG_0137.JPG -> A1172.JPG
+[DRY-RUN] Will rename: IMG_0142.JPG -> A1284.JPG
+[DRY-RUN] Will rename: IMG_0144.JPG -> D1025.JPG
+[DRY-RUN] Will rename: IMG_0146.JPG -> A1284.JPG
+[DRY-RUN] Will rename: IMG_0148.JPG -> F1305.JPG
+[DRY-RUN] Will rename: IMG_0149.JPG -> F1426.JPG
+No mapping found for: IMG_0150.JPG
+No mapping found for: IMG_0153.JPG
+No mapping found for: IMG_0155.JPG
+No mapping found for: IMG_0156.JPG
+No mapping found for: IMG_0158.JPG
+No mapping found for: IMG_0161.JPG
+No mapping found for: IMG_0163.JPG
+No mapping found for: IMG_0164.JPG
+No mapping found for: IMG_0165.JPG
+No mapping found for: IMG_0167.JPG
+No mapping found for: IMG_0169.JPG
+No mapping found for: IMG_0172.JPG
+No mapping found for: IMG_0174.JPG
+No mapping found for: IMG_0176.JPG
+No mapping found for: IMG_0178.JPG
+No mapping found for: IMG_0182.JPG
+No mapping found for: IMG_0183.JPG
+No mapping found for: IMG_0185.JPG
+No mapping found for: IMG_0188.JPG
+No mapping found for: IMG_0190.JPG
+No mapping found for: IMG_0191.JPG
+No mapping found for: IMG_0196.JPG
+No mapping found for: IMG_0199.JPG
+No mapping found for: IMG_0206.JPG
+No mapping found for: IMG_0208.JPG
+No mapping found for: IMG_0211.JPG
+No mapping found for: IMG_0214.JPG
+No mapping found for: IMG_0215.JPG
+No mapping found for: IMG_0216.JPG
+No mapping found for: IMG_0219.JPG
+No mapping found for: IMG_0221.JPG
+No mapping found for: IMG_0223.JPG
+No mapping found for: IMG_0225.JPG
+No mapping found for: IMG_0227.JPG
+No mapping found for: IMG_0229.JPG
+No mapping found for: IMG_0232.JPG
+No mapping found for: IMG_0233.JPG
+No mapping found for: IMG_0234.JPG
+No mapping found for: IMG_0235.JPG
+No mapping found for: IMG_0239.JPG
+No mapping found for: IMG_0240.JPG
+No mapping found for: IMG_0243.JPG
+No mapping found for: IMG_0245.JPG
+No mapping found for: IMG_0247.JPG
+No mapping found for: IMG_0250.JPG
+No mapping found for: IMG_0252.JPG
+No mapping found for: IMG_0254.JPG
+No mapping found for: IMG_0255.JPG
+No mapping found for: IMG_0258.JPG
+No mapping found for: IMG_0260.JPG
+No mapping found for: IMG_0261.JPG
+No mapping found for: IMG_0264.JPG
+No mapping found for: IMG_0265.JPG
+No mapping found for: IMG_0267.JPG
+No mapping found for: IMG_0269.JPG
+No mapping found for: IMG_0271.JPG
+No mapping found for: IMG_0274.JPG
+No mapping found for: IMG_0275.JPG
+No mapping found for: IMG_0278.JPG
+No mapping found for: IMG_0280.JPG
+
+Final Summary:
+Total files processed: 68
+Successfully renamed: 6

@@ -11,8 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configurazione Supabase
-const SUPABASE_URL = 'https://pbzeuxbmiawnjwpnbwkh.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBiemV1eGJtaWF3bmp3cG5id2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY2OTk3NzcsImV4cCI6MjA1MjI3NTc3N30.WuR3Av2-iN0CSqRhp2e2i_HVPz1G9FelKOJnlXYpqOM';
+const SUPABASE_URL = 'https://txsvbwbbhjkymmjlkgqk.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4c3Zid2JiaGpreW1tamxrZ3FrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjM2MDUzMSwiZXhwIjoyMDg3OTM2NTMxfQ.MRaA4YdFPCIX_r4dmkuZeX5zXVYB2_osYczjogbqhK4';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 

@@ -48,6 +48,13 @@ export function Header() {
                                     <span className="md:hidden">Prodotti</span>
                                 </button>
                                 <button
+                                    onClick={() => setView('image-associator')}
+                                    className="btn-skeuo px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium text-xs md:text-sm bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/50"
+                                >
+                                    <span className="hidden md:inline">Associa Immagini</span>
+                                    <span className="md:hidden">Associa IMG</span>
+                                </button>
+                                <button
                                     onClick={handleNewProduct}
                                     className="btn-skeuo-red px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium text-white shadow-sm text-xs md:text-sm"
                                 >

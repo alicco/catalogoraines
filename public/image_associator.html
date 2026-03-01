@@ -398,24 +398,22 @@
                     btn.innerHTML = `⏳ ${i + 1}/${total} Avvio...`;
 
                     try {
-                        // 1. Check Library
-                        if (typeof imglyRemoveBackground === 'undefined') {
-                            throw new Error("Libreria AI non caricata correttamente. Riprova o controlla la connessione.");
+                        // 2. Process Image via Local Python Server (Docker container mapped to 8091)
+                        showStatus(`Rimozione sfondo ${file.name} (Server Python)...`, 'success');
+
+                        const formData = new FormData();
+                        formData.append('file', file);
+
+                        const response = await fetch('http://localhost:8091/remove-bg', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`Errore Server Python: ${response.statusText}`);
                         }
 
-                        // 2. Process Image Client-Side (WASM)
-                        showStatus(`Rimozione sfondo ${file.name}... (richiede tempo per il download modelli)`, 'success');
-
-                        // imglyRemoveBackground returns a Blob
-                        // We use the global function exposed by the script
-                        // Note: It returns a Blob of the processed image
-                        const blob = await imglyRemoveBackground(file, {
-                            debug: true,
-                            progress: (key, current, total) => {
-                                const percent = Math.round((current / total) * 100);
-                                btn.innerHTML = `⏳ ${i + 1}/${total} ${key} ${percent}%`;
-                            }
-                        });
+                        const blob = await response.blob();
 
 
                         // 2. Upload processed image to Supabase (orphans folder)

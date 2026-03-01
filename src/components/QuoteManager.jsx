@@ -162,30 +162,33 @@ export function QuoteManager() {
 
     return (
         <div className="flex flex-col h-full bg-paper animate-in fade-in duration-500 font-sans">
-            {/* Header */}
-            <div className="bg-green-primary px-4 md:px-8 py-4 md:py-6 shadow-lg flex items-center justify-between border-b border-green-dark shrink-0">
-                <div className="flex items-center gap-4 md:gap-6">
+            {/* Unified Header */}
+            <header className="bg-green-dark text-white p-4 lg:px-8 flex items-center justify-between shadow-md z-30 shrink-0">
+                <div className="flex items-center gap-4">
                     <button
                         onClick={() => setView('kit')}
-                        className="btn-skeuo w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shadow-2xl transition-transform active:scale-90"
+                        className="bg-white/10 hover:bg-white/20 p-2 rounded-lg transition-all border border-white/20 flex items-center gap-2 text-sm font-bold"
+                        title="Torna al Catalogo Principale"
                     >
-                        <CloseIcon fontSize="small" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        INDIETRO
                     </button>
+                    <div className="h-8 w-px bg-white/20 mx-2 hidden lg:block"></div>
                     <div>
-                        <h2 className="text-white text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Archivio Cataloghi</h2>
-                        <p className="text-green-light text-[10px] font-bold uppercase tracking-[0.2em] opacity-80 mt-1">Gestione e consultazione salvataggi</p>
+                        <h2 className="text-xl font-bold tracking-tight uppercase">Archivio Cataloghi</h2>
+                        <p className="text-green-light/60 text-[10px] uppercase tracking-widest font-bold -mt-0.5">Gestione e consultazione salvataggi</p>
                     </div>
                 </div>
 
-                <div className="hidden md:flex items-center gap-4 bg-green-dark/30 px-5 py-2.5 rounded-2xl border border-white/5">
+                <div className="hidden md:flex items-center gap-4 bg-white/10 px-5 py-2 rounded-2xl border border-white/5">
                     <div className="text-right">
                         <div className="text-white font-black text-lg leading-none">{savedKits.length}</div>
                         <div className="text-green-light/60 text-[8px] font-bold uppercase tracking-widest mt-1">Sincronizzati</div>
                     </div>
-                    <div className="w-px h-8 bg-white/10" />
-                    <RestoreIcon className="text-green-light/40" />
+                    <div className="w-px h-6 bg-white/10" />
+                    <RestoreIcon className="text-green-light/40 w-5 h-5" />
                 </div>
-            </div>
+            </header>
 
             {/* Main Content */}
             <div className="flex-1 p-4 md:p-8 overflow-hidden flex flex-col">
