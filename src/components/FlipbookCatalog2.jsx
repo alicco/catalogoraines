@@ -304,17 +304,17 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
                 </div>
             </div>
 
-            {/* Product details list — strict 6 slots */}
+            {/* Product details list — strict 5 slots */}
             <div className="flex flex-col px-5 pt-3 pb-24 h-full" style={{ height: '100%' }}>
-                {Array.from({ length: 6 }).map((_, i) => {
+                {Array.from({ length: 5 }).map((_, i) => {
                     const p = products[i];
                     if (!p) return <div key={i} className="flex-1" />; // Spacer for empty slots
 
                     const promo = promoMap[p.id];
                     return (
                         <div key={i} className="flex flex-row items-center gap-3 relative" style={{
-                            height: '16.66%', // 100% / 6 = 16.66% strict height per slot
-                            borderBottom: i < 5 ? '1px solid #E2E8E4' : 'none',
+                            height: '20%', // 100% / 5 = 20% strict height per slot
+                            borderBottom: i < 4 ? '1px solid #E2E8E4' : 'none',
                             paddingTop: 4,
                             paddingBottom: 4,
                             overflow: 'hidden' // Prevent overflow
@@ -581,8 +581,8 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
 
     Object.entries(categoryMap).forEach(([cat, list]) => {
         categoryIndex.push({ name: cat, page: pageCounter });
-        for (let i = 0; i < list.length; i += 6) {
-            const chunk = list.slice(i, i + 6);
+        for (let i = 0; i < list.length; i += 5) {
+            const chunk = list.slice(i, i + 5);
             internalPages.push({
                 category: cat,
                 products: chunk,
@@ -831,18 +831,18 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                 doc.setFontSize(7);
                 doc.text("CATALOGO", W - 15, 12, { align: 'right' });
 
-                // Product rows (up to 6 slots)
+                // Product rows (up to 5 slots)
                 const startY = 24;
                 const maxY = H - FOOTER_HEIGHT - 6;
                 const availableHeight = maxY - startY;
-                const rowHeight = availableHeight / 6; // Space for 6 items
+                const rowHeight = availableHeight / 5; // Space for 5 items
 
                 for (let j = 0; j < page.products.length; j++) {
                     const p = page.products[j];
                     const y = startY + (j * rowHeight);
 
                     // Row background/border
-                    if (j < 5) { // Add separator line for all but the last item
+                    if (j < 4) { // Add separator line for all but the last item
                         doc.setDrawColor(226, 232, 228); // #E2E8E4
                         doc.setLineWidth(0.2);
                         doc.line(12, y + rowHeight - 1, W - 12, y + rowHeight - 1);
