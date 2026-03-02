@@ -290,7 +290,7 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
 
         <div className="relative z-10 flex flex-col flex-1" style={{ isolation: 'isolate' }}>
             {/* Green Header Band (Uniformato su entrambe le pagine) */}
-            <div className="relative overflow-hidden" style={{ backgroundColor: COLORS.primaryDeep, height: 44 }}>
+            <div className="relative overflow-hidden shrink-0" style={{ backgroundColor: COLORS.primaryDeep, height: 44 }}>
                 <div className="absolute right-0 top-0 h-full w-28" style={{
                     background: `linear-gradient(135deg, transparent 35%, ${COLORS.mintAccent}30 35%, ${COLORS.mintAccent}30 55%, transparent 55%)`,
                 }} />
@@ -305,16 +305,14 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
             </div>
 
             {/* Product details list — strict 5 slots */}
-            <div className="flex flex-col px-5 pt-3 pb-24 h-full" style={{ height: '100%' }}>
+            <div className="flex-1 flex flex-col px-5 pt-3 pb-24">
                 {Array.from({ length: 5 }).map((_, i) => {
                     const p = products[i];
                     if (!p) return <div key={i} className="flex-1" />; // Spacer for empty slots
 
                     const promo = promoMap[p.id];
                     return (
-                        <div key={i} className="flex flex-row items-center gap-3 relative shrink-0 grow-0" style={{
-                            height: '20%', // Exactly 20% of the available vertical space
-                            maxHeight: '20%', // strictly crop
+                        <div key={i} className="flex-1 flex flex-row items-center gap-3 relative min-h-0" style={{
                             borderBottom: i < 4 ? '1px solid #E2E8E4' : 'none',
                             paddingTop: 8,
                             paddingBottom: 8,
