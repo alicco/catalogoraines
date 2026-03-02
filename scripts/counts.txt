@@ -1,0 +1,13 @@
+[dotenv@17.2.3] injecting env (2) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Count for each category:
+- PRODOTTI CHIMICI: 61 prodotti => Pagine piene (da 5): 12, Rimanenti ultima pag: 1
+- ATTREZZATURE PER PULIZIE: 81 prodotti => Pagine piene (da 5): 16, Rimanenti ultima pag: 1
+- GUANTI, DPI  E ABBIGLIAMENTO MONOUSO: 49 prodotti => Pagine piene (da 5): 9, Rimanenti ultima pag: 4
+- PRONTO SOCCORSO - FARMACIA: 52 prodotti => Pagine piene (da 5): 10, Rimanenti ultima pag: 2
+- SACCHI PER RIFIUTI E DIFFERENZIATA: 35 prodotti => Pagine piene (da 5): 7, Rimanenti ultima pag: 0
+- PANNI ,STROFINACCI E SPUGNE: 47 prodotti => Pagine piene (da 5): 9, Rimanenti ultima pag: 2
+- CARRELLI PULIZIE - PATTUMIERE - CESTINI: 34 prodotti => Pagine piene (da 5): 6, Rimanenti ultima pag: 4
+- BANDIERE, CARTELLI E SEGNALETICA: 59 prodotti => Pagine piene (da 5): 11, Rimanenti ultima pag: 4
+- CANCELLERIA E ALTRO: 10 prodotti => Pagine piene (da 5): 2, Rimanenti ultima pag: 0
+- CARTA E DISPENSER: 38 prodotti => Pagine piene (da 5): 7, Rimanenti ultima pag: 3
+- MACCHINE PER LA PULIZIA: 13 prodotti => Pagine piene (da 5): 2, Rimanenti ultima pag: 3

@@ -314,6 +314,7 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
                     return (
                         <div key={i} className="flex flex-row items-center gap-3 relative shrink-0 grow-0" style={{
                             height: '20%', // Exactly 20% of the available vertical space
+                            maxHeight: '20%', // strictly crop
                             borderBottom: i < 4 ? '1px solid #E2E8E4' : 'none',
                             paddingTop: 8,
                             paddingBottom: 8,
@@ -329,7 +330,7 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
                             </div>
 
                             {/* Details Container (Right) */}
-                            <div className="flex-1 flex flex-col h-full min-w-0 justify-center">
+                            <div className="flex-1 flex flex-col h-full min-w-0 justify-center min-h-0">
                                 <div className="flex items-start gap-2 justify-between">
                                     <div className="flex-1 min-w-0 pr-2">
                                         <h3 className="font-extrabold text-gray-900 text-[11px] leading-tight uppercase tracking-tight line-clamp-2" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -356,7 +357,7 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
                                 </div>
 
                                 {/* Description */}
-                                <p className="text-slate-500 text-[8px] leading-snug line-clamp-2 mt-1 pr-2">
+                                <p className="text-slate-500 text-[8px] leading-snug line-clamp-1 mt-1 pr-2">
                                     {p.description || "Scheda tecnica disponibile su richiesta."}
                                 </p>
 
