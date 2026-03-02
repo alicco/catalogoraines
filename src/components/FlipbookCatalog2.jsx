@@ -592,7 +592,8 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
         }
     });
 
-    const totalPages = pageCounter; // pageCounter ends at back cover page
+    const needsFillerBlank = internalPages.length % 2 !== 0;
+    const totalPages = pageCounter + (needsFillerBlank ? 1 : 0);
 
     const onFlip = (e) => {
         setCurrentPage(e.data);
@@ -954,6 +955,11 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                 drawFooter(page.pageNum, isLeft);
             }
 
+            // Filler blank page to keep back cover on the left side (even page count)
+            if (needsFillerBlank) {
+                doc.addPage();
+                drawBackground();
+            }
 
             // BACK COVER
             doc.addPage();
@@ -1084,6 +1090,11 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                                 promoMap={promoMap}
                             />
                         )),
+
+                        // Optional Filler Blank to keep Back Cover on the Left
+                        ...(needsFillerBlank ? [
+                            <BlankPage key="filler-blank" isLeft={false} />
+                        ] : []),
 
                         // Last. Back Cover (left — showCover renders it alone)
                         <BackCover key="back-cover" />,
