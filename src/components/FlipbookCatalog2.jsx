@@ -320,7 +320,7 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
                             overflow: 'hidden' // Prevent overflow
                         }}>
                             {/* Image Container (Left) */}
-                            <div className="shrink-0 w-20 h-full max-h-20 bg-white rounded-md shadow-sm border border-slate-100 flex items-center justify-center p-1 relative">
+                            <div className="shrink-0 w-20 h-full max-h-20 bg-transparent rounded-md border flex items-center justify-center p-1 relative" style={{ borderColor: COLORS.primaryDeep }}>
                                 {p.image_url ? (
                                     <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" />
                                 ) : (
@@ -854,9 +854,9 @@ export function FlipbookCatalog2({ items = [], catalogTitle = "Catalogo", onClos
                     const imgBoxX = 12;
                     const imgBoxY = y + 2;
 
-                    doc.setDrawColor(240, 240, 240);
-                    doc.setFillColor(255, 255, 255);
-                    doc.roundedRect(imgBoxX, imgBoxY, imgBoxSize, imgBoxSize, 1, 1, 'FD');
+                    doc.setDrawColor(PDF_COLORS.primaryDeep.r, PDF_COLORS.primaryDeep.g, PDF_COLORS.primaryDeep.b);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(imgBoxX, imgBoxY, imgBoxSize, imgBoxSize, 1, 1, 'S');
 
                     if (p.image_url) {
                         try {
