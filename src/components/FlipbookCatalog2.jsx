@@ -312,11 +312,11 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
 
                     const promo = promoMap[p.id];
                     return (
-                        <div key={i} className="flex flex-row items-center gap-3 relative" style={{
-                            height: '20%', // 100% / 5 = 20% strict height per slot
+                        <div key={i} className="flex flex-row items-center gap-3 relative shrink-0 grow-0" style={{
+                            height: '20%', // Exactly 20% of the available vertical space
                             borderBottom: i < 4 ? '1px solid #E2E8E4' : 'none',
-                            paddingTop: 4,
-                            paddingBottom: 4,
+                            paddingTop: 8,
+                            paddingBottom: 8,
                             overflow: 'hidden' // Prevent overflow
                         }}>
                             {/* Image Container (Left) */}
