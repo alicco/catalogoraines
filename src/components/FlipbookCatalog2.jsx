@@ -320,11 +320,11 @@ const ProductListPage = forwardRef(({ category, products, pageNum, isLeft, promo
                             overflow: 'hidden' // Prevent overflow
                         }}>
                             {/* Image Container (Left) */}
-                            <div className="shrink-0 w-20 h-full max-h-20 bg-transparent rounded-md border flex items-center justify-center p-1 relative" style={{ borderColor: COLORS.primaryDeep }}>
+                            <div className="shrink-0 w-16 h-16 aspect-square bg-transparent rounded border flex items-center justify-center p-1 relative" style={{ borderColor: COLORS.primaryDeep }}>
                                 {p.image_url ? (
                                     <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" />
                                 ) : (
-                                    <span className="text-xs text-slate-300 font-mono">No Img</span>
+                                    <span className="text-[10px] text-slate-300 font-mono">No Img</span>
                                 )}
                             </div>
 
