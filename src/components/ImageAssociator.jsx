@@ -91,7 +91,7 @@ export function ImageAssociator() {
                 showStatus(`Elaborazione ${i + 1}/${total}: ${file.name}...`, 'info');
 
                 try {
-                    // 1. Image processing (transform to 300x300 SVG with Auto-Crop)
+                    // 1. Image processing (transform to 300x300 SVG via Canvas)
                     const processImageToSVG = (sourceFile) => {
                         return new Promise((resolve, reject) => {
                             const img = new Image();
@@ -293,8 +293,6 @@ export function ImageAssociator() {
     };
 
     const searchProducts = async (query) => {
-        setSearchQuery(query);
-
         if (query.length < 2) {
             setSearchResults([]);
             return;
@@ -303,7 +301,7 @@ export function ImageAssociator() {
         const { data, error } = await supabase
             .from('catalogo')
             .select('codice_articolo, descrizione')
-            .or(`codice_articolo.ilike.%${query}%,descrizione.ilike.%${query}%`)
+            .or(`codice_articolo.ilike.*${query}*,descrizione.ilike.*${query}*`)
             .limit(20);
 
         if (error) {
@@ -568,7 +566,7 @@ export function ImageAssociator() {
 
                                 {/* Search Results Dropdown/List */}
                                 {searchResults.length > 0 && (
-                                    <div className="mt-2 bg-white border-2 border-green-primary rounded-2xl overflow-hidden shadow-2xl custom-scrollbar absolute top-[100%] left-0 right-0 z-50">
+                                    <div className="mt-2 bg-white border-2 border-green-primary rounded-2xl overflow-hidden shadow-2xl custom-scrollbar absolute top-[100%] left-0 right-0 z-30">
                                         {searchResults.map(p => (
                                             <div
                                                 key={p.codice_articolo}
