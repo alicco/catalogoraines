@@ -161,20 +161,53 @@ export function ProductEditor() {
 
         // 2. Process image and Upload to Supabase Storage
         try {
-            // A. Process Image (Remove BG and Convert to SVG)
-            const processFormData = new FormData();
-            processFormData.append('file', file);
+            // A. Process Image (transform to 300x300 SVG via Canvas)
+            const processImageToSVG = (sourceFile) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    const objectUrl = URL.createObjectURL(sourceFile);
+                    
+                    img.onload = () => {
+                        URL.revokeObjectURL(objectUrl);
+                        const canvas = document.createElement('canvas');
+                        const TARGET_SIZE = 300;
+                        canvas.width = TARGET_SIZE;
+                        canvas.height = TARGET_SIZE;
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Calculate scaling factor to fit image within 300x300
+                        const scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
+                        const newW = img.width * scale;
+                        const newH = img.height * scale;
+                        
+                        // Clear canvas (ensure transparency)
+                        ctx.clearRect(0, 0, TARGET_SIZE, TARGET_SIZE);
+                        
+                        // Paste resized image into center
+                        const pasteX = (TARGET_SIZE - newW) / 2;
+                        const pasteY = (TARGET_SIZE - newH) / 2;
+                        
+                        ctx.drawImage(img, pasteX, pasteY, newW, newH);
+                        
+                        // Get PNG base64
+                        const dataUrl = canvas.toDataURL('image/png');
+                        const base64Data = dataUrl.split(',')[1];
+                        
+                        // Construct SVG
+                        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <image href="data:image/png;base64,${base64Data}" width="300" height="300" x="0" y="0" />
+</svg>`;
+                        
+                        const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+                        resolve(svgBlob);
+                    };
+                    
+                    img.onerror = () => reject(new Error("Errore lettura immagine locale"));
+                    img.src = objectUrl;
+                });
+            };
 
-            const response = await fetch('http://localhost:8091/remove-bg?format=svg', {
-                method: 'POST',
-                body: processFormData
-            });
-
-            if (!response.ok) {
-                throw new Error(`Errore Server Python: ${response.statusText}. Assicurati che il server.py sia in riproduzione sulla porta 8091.`);
-            }
-
-            const processedBlob = await response.blob();
+            const processedBlob = await processImageToSVG(file);
 
             // B. Upload Processed Blob
             const fileName = `raines_images_cleaned/${formData.id}.svg`;
