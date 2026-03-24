@@ -115,6 +115,21 @@ export function ImageAssociator() {
                                 const pasteY = (TARGET_SIZE - newH) / 2;
                                 
                                 ctx.drawImage(img, pasteX, pasteY, newW, newH);
+
+                                // --- START BACKGROUND REMOVAL (Basic White Transparent) ---
+                                const imageData = ctx.getImageData(0, 0, TARGET_SIZE, TARGET_SIZE);
+                                const data = imageData.data;
+                                for (let j = 0; j < data.length; j += 4) {
+                                    const r = data[j];
+                                    const g = data[j + 1];
+                                    const b = data[j + 2];
+                                    // If R, G, B are all > 240, make it transparent
+                                    if (r > 240 && g > 240 && b > 240) {
+                                        data[j + 3] = 0;
+                                    }
+                                }
+                                ctx.putImageData(imageData, 0, 0);
+                                // --- END BACKGROUND REMOVAL ---
                                 
                                 // Get PNG base64
                                 const dataUrl = canvas.toDataURL('image/png');
@@ -281,16 +296,22 @@ export function ImageAssociator() {
 
         try {
             const sourcePath = `${selectedOrphan.folder}${selectedOrphan.name}`;
-            const targetPath = `raines_images_cleaned/${selectedOrphan.name}`;
+            const targetName = `${selectedProduct.codice_articolo}.svg`;
+            const targetPath = `raines_images_cleaned/${targetName}`;
 
-            if (sourcePath !== targetPath) {
-                const { error: moveError } = await supabase.storage
-                    .from(BUCKET_NAME)
-                    .move(sourcePath, targetPath);
+            // IMPORTANT: If we are assigning an orphan, always rename it to the product code
+            const { error: moveError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .move(sourcePath, targetPath);
 
-                if (moveError) {
-                    console.warn("Move warning:", moveError);
-                    throw new Error('Errore spostamento file: ' + moveError.message);
+            if (moveError) {
+                // If target already exists, try to delete and move again, or just warn
+                if (moveError.error === 'Duplicate' || moveError.message?.includes('already exists')) {
+                    await supabase.storage.from(BUCKET_NAME).remove([targetPath]);
+                    await supabase.storage.from(BUCKET_NAME).move(sourcePath, targetPath);
+                } else {
+                    console.warn("Move error:", moveError);
+                    throw new Error('Errore spostamento/ridenominazione file: ' + moveError.message);
                 }
             }
 
@@ -300,7 +321,7 @@ export function ImageAssociator() {
                 .from('catalogo')
                 .update({
                     link_immagine: publicUrl,
-                    immagine_locale: selectedOrphan.name
+                    immagine_locale: targetName
                 })
                 .eq('codice_articolo', selectedProduct.codice_articolo);
 
@@ -310,7 +331,7 @@ export function ImageAssociator() {
             useStore.setState(state => ({
                 inventory: state.inventory.map(item =>
                     item.id === selectedProduct.codice_articolo
-                        ? { ...item, image: `${publicUrl}?v=${Date.now()}`, image_url: publicUrl, immagine_locale: selectedOrphan.name }
+                        ? { ...item, image: `${publicUrl}?v=${Date.now()}`, image_url: publicUrl, immagine_locale: targetName }
                         : item
                 )
             }));
