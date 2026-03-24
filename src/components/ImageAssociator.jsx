@@ -91,7 +91,7 @@ export function ImageAssociator() {
                 showStatus(`Elaborazione ${i + 1}/${total}: ${file.name}...`, 'info');
 
                 try {
-                    // 1. Image processing (transform to 300x300 SVG via Canvas)
+                    // 1. Image processing (transform to 1000x1000 SVG via Canvas)
                     const processImageToSVG = (sourceFile) => {
                         return new Promise((resolve, reject) => {
                             const img = new Image();
@@ -100,12 +100,16 @@ export function ImageAssociator() {
                             img.onload = () => {
                                 URL.revokeObjectURL(objectUrl);
                                 const canvas = document.createElement('canvas');
-                                const TARGET_SIZE = 300;
+                                const TARGET_SIZE = 1000; // Increased resolution
                                 canvas.width = TARGET_SIZE;
                                 canvas.height = TARGET_SIZE;
                                 const ctx = canvas.getContext('2d');
                                 
-                                // Calculate scaling factor to fit image within 300x300
+                                // Enable high quality smoothing
+                                ctx.imageSmoothingEnabled = true;
+                                ctx.imageSmoothingQuality = 'high';
+                                
+                                // Calculate scaling factor to fit image within 1000x1000
                                 const scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
                                 const newW = img.width * scale;
                                 const newH = img.height * scale;
@@ -116,28 +120,29 @@ export function ImageAssociator() {
                                 
                                 ctx.drawImage(img, pasteX, pasteY, newW, newH);
 
-                                // --- START BACKGROUND REMOVAL (Basic White Transparent) ---
+                                // --- START BACKGROUND REMOVAL (Improved Threshold) ---
                                 const imageData = ctx.getImageData(0, 0, TARGET_SIZE, TARGET_SIZE);
                                 const data = imageData.data;
                                 for (let j = 0; j < data.length; j += 4) {
                                     const r = data[j];
                                     const g = data[j + 1];
                                     const b = data[j + 2];
-                                    // If R, G, B are all > 240, make it transparent
-                                    if (r > 240 && g > 240 && b > 240) {
+                                    // If R, G, B are all > 230 (more aggressive towards gray-whites)
+                                    // OR if the sum is very close to white
+                                    if ((r > 230 && g > 230 && b > 230) || (r + g + b > 690)) {
                                         data[j + 3] = 0;
                                     }
                                 }
                                 ctx.putImageData(imageData, 0, 0);
                                 // --- END BACKGROUND REMOVAL ---
                                 
-                                // Get PNG base64
-                                const dataUrl = canvas.toDataURL('image/png');
+                                // Get PNG base64 (high quality)
+                                const dataUrl = canvas.toDataURL('image/png', 0.95);
                                 const base64Data = dataUrl.split(',')[1];
                                 
-                                // Construct SVG
-                                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
-  <image href="data:image/png;base64,${base64Data}" width="300" height="300" x="0" y="0" />
+                                // Construct SVG (Maintain 1000x1000 viewbox)
+                                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <image href="data:image/png;base64,${base64Data}" width="1000" height="1000" x="0" y="0" />
 </svg>`;
                                 
                                 const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
