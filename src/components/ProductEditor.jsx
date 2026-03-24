@@ -159,16 +159,31 @@ export function ProductEditor() {
         };
         reader.readAsDataURL(file);
 
-        // 2. Upload to Supabase Storage
+        // 2. Process image and Upload to Supabase Storage
         try {
-            const fileName = `raines_images_cleaned/${formData.id}_v2.png`;
+            // A. Process Image (Remove BG and Convert to SVG)
+            const processFormData = new FormData();
+            processFormData.append('file', file);
 
-            // Upload to catalog bucket
+            const response = await fetch('http://localhost:8091/remove-bg?format=svg', {
+                method: 'POST',
+                body: processFormData
+            });
+
+            if (!response.ok) {
+                throw new Error(`Errore Server Python: ${response.statusText}. Assicurati che il server.py sia in riproduzione sulla porta 8091.`);
+            }
+
+            const processedBlob = await response.blob();
+
+            // B. Upload Processed Blob
+            const fileName = `raines_images_cleaned/${formData.id}.svg`;
+
             const { error: uploadError } = await supabase.storage
                 .from('catalog')
-                .upload(fileName, file, {
+                .upload(fileName, processedBlob, {
                     upsert: true,
-                    contentType: file.type,
+                    contentType: 'image/svg+xml',
                     cacheControl: '0'
                 });
 
@@ -304,7 +319,7 @@ export function ProductEditor() {
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <span className="text-sm font-bold text-green-dark/60">Trascina o clicca per caricare</span>
-                                        <span className="text-[9px] text-green-dark/30 uppercase font-black tracking-widest">Target: {formData.id}_v2.png</span>
+                                        <span className="text-[9px] text-green-dark/30 uppercase font-black tracking-widest">Target: {formData.id}.svg</span>
                                     </div>
                                 </div>
                             )}
