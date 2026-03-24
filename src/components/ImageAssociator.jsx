@@ -91,21 +91,53 @@ export function ImageAssociator() {
                 showStatus(`Elaborazione ${i + 1}/${total}: ${file.name}...`, 'info');
 
                 try {
-                    // 1. Image processing (remove bg + transform to SVG)
-                    const formData = new FormData();
-                    formData.append('file', file);
+                    // 1. Image processing (transform to 300x300 SVG via Canvas)
+                    const processImageToSVG = (sourceFile) => {
+                        return new Promise((resolve, reject) => {
+                            const img = new Image();
+                            const objectUrl = URL.createObjectURL(sourceFile);
+                            
+                            img.onload = () => {
+                                URL.revokeObjectURL(objectUrl);
+                                const canvas = document.createElement('canvas');
+                                const TARGET_SIZE = 300;
+                                canvas.width = TARGET_SIZE;
+                                canvas.height = TARGET_SIZE;
+                                const ctx = canvas.getContext('2d');
+                                
+                                // Calculate scaling factor to fit image within 300x300
+                                const scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
+                                const newW = img.width * scale;
+                                const newH = img.height * scale;
+                                
+                                // Clear canvas
+                                ctx.clearRect(0, 0, TARGET_SIZE, TARGET_SIZE);
+                                
+                                // Paste resized image into center
+                                const pasteX = (TARGET_SIZE - newW) / 2;
+                                const pasteY = (TARGET_SIZE - newH) / 2;
+                                
+                                ctx.drawImage(img, pasteX, pasteY, newW, newH);
+                                
+                                // Get PNG base64
+                                const dataUrl = canvas.toDataURL('image/png');
+                                const base64Data = dataUrl.split(',')[1];
+                                
+                                // Construct SVG
+                                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <image href="data:image/png;base64,${base64Data}" width="300" height="300" x="0" y="0" />
+</svg>`;
+                                
+                                const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+                                resolve(svgBlob);
+                            };
+                            
+                            img.onerror = () => reject(new Error("Errore lettura immagine locale"));
+                            img.src = objectUrl;
+                        });
+                    };
 
-                    // Add format=svg parameter
-                    const response = await fetch('http://localhost:8091/remove-bg?format=svg', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Errore Server Python: ${response.statusText}`);
-                    }
-
-                    const blob = await response.blob();
+                    const blob = await processImageToSVG(file);
                     const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
 
                     // 2. CHECK FOR MULTIPLE PRODUCT CODES
