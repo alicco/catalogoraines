@@ -3,7 +3,10 @@ import { Dialog, DialogContent, DialogTitle, DialogActions, Button, TextField, I
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import useStore from '../lib/store';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, SUPABASE_URL } from '../lib/supabaseClient';
+
+const BUCKET_NAME = 'catalog';
+const STORAGE_BASE_URL = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`;
 
 export function ProductEditor() {
     const addProduct = useStore((state) => state.addProduct);
@@ -161,7 +164,7 @@ export function ProductEditor() {
 
         // 2. Process image and Upload to Supabase Storage
         try {
-            // A. Process Image (transform to 300x300 SVG via Canvas)
+            // A. Process Image (Transform to 300x300 SVG via Canvas)
             const processImageToSVG = (sourceFile) => {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
@@ -175,15 +178,12 @@ export function ProductEditor() {
                         canvas.height = TARGET_SIZE;
                         const ctx = canvas.getContext('2d');
                         
-                        // Calculate scaling factor to fit image within 300x300
+                        // Calculate scaling factor
                         const scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
                         const newW = img.width * scale;
                         const newH = img.height * scale;
                         
-                        // Clear canvas (ensure transparency)
-                        ctx.clearRect(0, 0, TARGET_SIZE, TARGET_SIZE);
-                        
-                        // Paste resized image into center
+                        // Center image
                         const pasteX = (TARGET_SIZE - newW) / 2;
                         const pasteY = (TARGET_SIZE - newH) / 2;
                         
@@ -213,7 +213,7 @@ export function ProductEditor() {
             const fileName = `raines_images_cleaned/${formData.id}.svg`;
 
             const { error: uploadError } = await supabase.storage
-                .from('catalog')
+                .from(BUCKET_NAME)
                 .upload(fileName, processedBlob, {
                     upsert: true,
                     contentType: 'image/svg+xml',
@@ -223,14 +223,12 @@ export function ProductEditor() {
             if (uploadError) throw uploadError;
 
             // Get Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('catalog')
-                .getPublicUrl(fileName);
+            const publicUrl = `${STORAGE_BASE_URL}/${fileName}`;
 
             // Update FormData with the REAL remote URL
             setFormData(prev => ({
                 ...prev,
-                image: publicUrl,
+                image: `${publicUrl}?v=${Date.now()}`,
                 image_url: publicUrl
             }));
 
@@ -478,3 +476,5 @@ export function ProductEditor() {
         </Dialog>
     );
 }
+
+export default ProductEditor;
