@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase, SUPABASE_URL } from '../lib/supabaseClient';
 import useStore from '../lib/store';
 
 const BUCKET_NAME = 'catalog';
-const STORAGE_BASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`;
+const STORAGE_BASE_URL = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}`;
 
 export function ImageAssociator() {
     const [orphans, setOrphans] = useState([]);
@@ -110,9 +110,6 @@ export function ImageAssociator() {
                                 const newW = img.width * scale;
                                 const newH = img.height * scale;
                                 
-                                // Clear canvas
-                                ctx.clearRect(0, 0, TARGET_SIZE, TARGET_SIZE);
-                                
                                 // Paste resized image into center
                                 const pasteX = (TARGET_SIZE - newW) / 2;
                                 const pasteY = (TARGET_SIZE - newH) / 2;
@@ -144,10 +141,10 @@ export function ImageAssociator() {
                     // Split by common separators: underscore, dash, space, comma
                     const potentialCodes = nameWithoutExt.split(/[_\-\s,]+/).filter(Boolean);
 
-                    // Find matches in inventory (exact match for each part)
+                    // Find matches in inventory (CASE-INSENSITIVE)
                     const matchedProducts = [];
                     for (const codePart of potentialCodes) {
-                        const match = inventory.find(p => p.id === codePart);
+                        const match = inventory.find(p => String(p.id).toLowerCase() === codePart.toLowerCase());
                         if (match && !matchedProducts.find(m => m.id === match.id)) {
                             matchedProducts.push(match);
                         }
@@ -205,8 +202,9 @@ export function ImageAssociator() {
                         showStatus(`Auto-associato ${matchedProducts.length} codici da ${file.name}`, 'success');
                     } else {
                         // NO MATCH -> Upload to ORPHANS as generic SVG
+                        showStatus(`Nessun match per ${file.name}, caricamento in ORFANE...`, 'info');
                         const newName = nameWithoutExt + ".svg";
-                        const { error } = await supabase.storage
+                        const { error: uploadError } = await supabase.storage
                             .from(BUCKET_NAME)
                             .upload('orphans/' + newName, blob, {
                                 cacheControl: '0',
@@ -214,7 +212,10 @@ export function ImageAssociator() {
                                 contentType: 'image/svg+xml'
                             });
 
-                        if (error) throw error;
+                        if (uploadError) {
+                            console.error("Errore upload orfano:", uploadError);
+                            throw new Error(`Upload Fallito: ${uploadError.message}`);
+                        }
                     }
 
                 } catch (innerErr) {
