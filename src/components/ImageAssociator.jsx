@@ -91,7 +91,7 @@ export function ImageAssociator() {
                 showStatus(`Elaborazione ${i + 1}/${total}: ${file.name}...`, 'info');
 
                 try {
-                    // 1. Image processing (transform to 1000x1000 SVG via Canvas)
+                    // 1. Image processing (transform to 300x300 SVG with Auto-Crop)
                     const processImageToSVG = (sourceFile) => {
                         return new Promise((resolve, reject) => {
                             const img = new Image();
@@ -99,50 +99,81 @@ export function ImageAssociator() {
                             
                             img.onload = () => {
                                 URL.revokeObjectURL(objectUrl);
-                                const canvas = document.createElement('canvas');
-                                const TARGET_SIZE = 1000; // Increased resolution
-                                canvas.width = TARGET_SIZE;
-                                canvas.height = TARGET_SIZE;
-                                const ctx = canvas.getContext('2d');
                                 
-                                // Enable high quality smoothing
-                                ctx.imageSmoothingEnabled = true;
-                                ctx.imageSmoothingQuality = 'high';
+                                // Internal high-res for quality (600px), final display 300px
+                                const INTERNAL_SIZE = 600;
+                                const DISPLAY_SIZE = 300;
                                 
-                                // Calculate scaling factor to fit image within 1000x1000
-                                const scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
-                                const newW = img.width * scale;
-                                const newH = img.height * scale;
+                                // 1. CREATE TEMP CANVAS FOR PROCESSING & BACKGROUND REMOVAL
+                                const tempCanvas = document.createElement('canvas');
+                                tempCanvas.width = img.width;
+                                tempCanvas.height = img.height;
+                                const tCtx = tempCanvas.getContext('2d');
+                                tCtx.drawImage(img, 0, 0);
                                 
-                                // Paste resized image into center
-                                const pasteX = (TARGET_SIZE - newW) / 2;
-                                const pasteY = (TARGET_SIZE - newH) / 2;
+                                const tData = tCtx.getImageData(0, 0, img.width, img.height);
+                                const pixels = tData.data;
                                 
-                                ctx.drawImage(img, pasteX, pasteY, newW, newH);
+                                let minX = img.width, minY = img.height, maxX = 0, maxY = 0;
+                                let foundContent = false;
 
-                                // --- START BACKGROUND REMOVAL (Improved Threshold) ---
-                                const imageData = ctx.getImageData(0, 0, TARGET_SIZE, TARGET_SIZE);
-                                const data = imageData.data;
-                                for (let j = 0; j < data.length; j += 4) {
-                                    const r = data[j];
-                                    const g = data[j + 1];
-                                    const b = data[j + 2];
-                                    // If R, G, B are all > 230 (more aggressive towards gray-whites)
-                                    // OR if the sum is very close to white
+                                // 2. REMOVE BACKGROUND & FIND BOUNDS
+                                for (let j = 0; j < pixels.length; j += 4) {
+                                    const r = pixels[j];
+                                    const g = pixels[j + 1];
+                                    const b = pixels[j + 2];
+                                    
+                                    // Threshold 230 for aggressive removal
                                     if ((r > 230 && g > 230 && b > 230) || (r + g + b > 690)) {
-                                        data[j + 3] = 0;
+                                        pixels[j + 3] = 0; // Transparent
+                                    } else {
+                                        // Update bounding box
+                                        const x = (j / 4) % img.width;
+                                        const y = Math.floor((j / 4) / img.width);
+                                        minX = Math.min(minX, x);
+                                        minY = Math.min(minY, y);
+                                        maxX = Math.max(maxX, x);
+                                        maxY = Math.max(maxY, y);
+                                        foundContent = true;
                                     }
                                 }
-                                ctx.putImageData(imageData, 0, 0);
-                                // --- END BACKGROUND REMOVAL ---
+                                tCtx.putImageData(tData, 0, 0);
+
+                                // 3. FINAL CANVAS (Standard 300x300 box, but rendered at 600px for sharpness)
+                                const finalCanvas = document.createElement('canvas');
+                                finalCanvas.width = INTERNAL_SIZE;
+                                finalCanvas.height = INTERNAL_SIZE;
+                                const fCtx = finalCanvas.getContext('2d');
+                                fCtx.imageSmoothingEnabled = true;
+                                fCtx.imageSmoothingQuality = 'high';
+
+                                if (foundContent) {
+                                    const contentW = maxX - minX + 1;
+                                    const contentH = maxY - minY + 1;
+                                    
+                                    // Scale to fit content into INTERNAL_SIZE with 5% padding
+                                    const PADDING = 0.05;
+                                    const safeArea = INTERNAL_SIZE * (1 - PADDING * 2);
+                                    const scale = Math.min(safeArea / contentW, safeArea / contentH);
+                                    
+                                    const drawW = contentW * scale;
+                                    const drawH = contentH * scale;
+                                    const offX = (INTERNAL_SIZE - drawW) / 2;
+                                    const offY = (INTERNAL_SIZE - drawH) / 2;
+                                    
+                                    fCtx.drawImage(tempCanvas, minX, minY, contentW, contentH, offX, offY, drawW, drawH);
+                                } else {
+                                    // Fallback if image is somehow empty or all white
+                                    fCtx.drawImage(tempCanvas, 0, 0, INTERNAL_SIZE, INTERNAL_SIZE);
+                                }
                                 
-                                // Get PNG base64 (high quality)
-                                const dataUrl = canvas.toDataURL('image/png', 0.95);
+                                // Get PNG base64
+                                const dataUrl = finalCanvas.toDataURL('image/png');
                                 const base64Data = dataUrl.split(',')[1];
                                 
-                                // Construct SVG (Maintain 1000x1000 viewbox)
-                                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
-  <image href="data:image/png;base64,${base64Data}" width="1000" height="1000" x="0" y="0" />
+                                // Construct SVG (ViewBox 300 300 as established)
+                                const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <image href="data:image/png;base64,${base64Data}" width="300" height="300" x="0" y="0" />
 </svg>`;
                                 
                                 const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
@@ -537,13 +568,14 @@ export function ImageAssociator() {
 
                                 {/* Search Results Dropdown/List */}
                                 {searchResults.length > 0 && (
-                                    <div className="mt-2 bg-white border-2 border-green-primary rounded-2xl overflow-hidden shadow-2xl custom-scrollbar absolute top-[100%] left-0 right-0 z-30">
+                                    <div className="mt-2 bg-white border-2 border-green-primary rounded-2xl overflow-hidden shadow-2xl custom-scrollbar absolute top-[100%] left-0 right-0 z-50">
                                         {searchResults.map(p => (
                                             <div
                                                 key={p.codice_articolo}
                                                 onClick={() => {
                                                     setSelectedProduct(p);
                                                     setSearchResults([]);
+                                                    setSearchQuery('');
                                                 }}
                                                 className="p-4 border-b border-gray-100 cursor-pointer hover:bg-green-light transition-colors flex items-center group"
                                             >
