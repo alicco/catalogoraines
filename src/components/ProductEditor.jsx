@@ -67,10 +67,14 @@ export function ProductEditor({ productId, onClose }) {
                         img.onload = () => {
                             URL.revokeObjectURL(objectUrl);
                             const canvas = document.createElement('canvas');
-                            const TARGET_SIZE = 300;
+                            const TARGET_SIZE = 1000;
                             canvas.width = TARGET_SIZE;
                             canvas.height = TARGET_SIZE;
                             const ctx = canvas.getContext('2d');
+                            
+                            // Enable high quality smoothing
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
                             
                             // Calculate scaling factor
                             const scale = Math.min(TARGET_SIZE / img.width, TARGET_SIZE / img.height);
@@ -83,27 +87,28 @@ export function ProductEditor({ productId, onClose }) {
                             
                             ctx.drawImage(img, pasteX, pasteY, newW, newH);
 
-                            // --- START BACKGROUND REMOVAL (Basic White Transparent) ---
+                            // --- START BACKGROUND REMOVAL (Improved Threshold) ---
                             const imageData = ctx.getImageData(0, 0, TARGET_SIZE, TARGET_SIZE);
                             const data = imageData.data;
                             for (let j = 0; j < data.length; j += 4) {
                                 const r = data[j];
                                 const g = data[j + 1];
                                 const b = data[j + 2];
-                                if (r > 240 && g > 240 && b > 240) {
+                                // If R, G, B are all > 230 (more aggressive towards gray-whites) OR if sum > 690
+                                if ((r > 230 && g > 230 && b > 230) || (r + g + b > 690)) {
                                     data[j + 3] = 0;
                                 }
                             }
                             ctx.putImageData(imageData, 0, 0);
                             // --- END BACKGROUND REMOVAL ---
                             
-                            // Get PNG base64
-                            const dataUrl = canvas.toDataURL('image/png');
+                            // Get PNG base64 (high quality)
+                            const dataUrl = canvas.toDataURL('image/png', 0.95);
                             const base64Data = dataUrl.split(',')[1];
                             
                             // Construct SVG
-                            const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
-  <image href="data:image/png;base64,${base64Data}" width="300" height="300" x="0" y="0" />
+                            const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <image href="data:image/png;base64,${base64Data}" width="1000" height="1000" x="0" y="0" />
 </svg>`;
                             
                             const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
