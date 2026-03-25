@@ -76,6 +76,13 @@ const HTML5toTouch = {
   ],
 };
 
+// SHARED WRAPPER for specialized views - ensures proper layout and global tools
+const ViewWrapper = ({ children }) => (
+  <div className="h-screen w-screen bg-paper overflow-hidden flex flex-col relative">
+    {children}
+  </div>
+);
+
 function App() {
   const [toast, setToast] = useState(null);
   const [dropAnimation, setDropAnimation] = useState(false);
@@ -129,23 +136,17 @@ function App() {
     );
   }
 
-  // SHARED WRAPPER for specialized views - ensures proper layout and global tools
-  const ViewWrapper = ({ children }) => (
-    <div className="h-screen w-screen bg-paper overflow-hidden flex flex-col relative">
-      {children}
-      <ProductEditor />
-    </div>
-  );
-
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
+  // Specialized Views
   if (currentView === 'product-manager') {
     return (
       <ErrorBoundary>
         <ViewWrapper>
           <ProductManager />
+          <ProductEditor />
         </ViewWrapper>
       </ErrorBoundary>
     );
@@ -156,6 +157,7 @@ function App() {
       <ErrorBoundary>
         <ViewWrapper>
           <QuoteManager />
+          <ProductEditor />
         </ViewWrapper>
       </ErrorBoundary>
     );
@@ -166,6 +168,7 @@ function App() {
       <ErrorBoundary>
         <ViewWrapper>
           <PromoManager />
+          <ProductEditor />
         </ViewWrapper>
       </ErrorBoundary>
     );
@@ -176,6 +179,7 @@ function App() {
       <ErrorBoundary>
         <ViewWrapper>
           <ImageAssociator />
+          <ProductEditor />
         </ViewWrapper>
       </ErrorBoundary>
     );
@@ -193,13 +197,14 @@ function App() {
     );
   }
 
+  // Default Main View (Kit/Catalog Builder)
   return (
     <ErrorBoundary>
       <DndProvider backend={MultiBackend} options={HTML5toTouch}>
-        <div className="bg-paper font-sans text-gray-800 h-screen flex flex-col overflow-hidden">
+        <div className="bg-paper font-sans text-gray-800 h-screen flex flex-col overflow-hidden relative">
           <Header />
 
-          {/* Editor Modal is globally available */}
+          {/* Editor Modal is globally available at the absolute root */}
           <ProductEditor />
 
           {/* Custom drag preview layer */}
@@ -207,27 +212,19 @@ function App() {
 
           {/* Mobile: Side-by-side products + kit, then total below */}
           <main className="flex-1 flex flex-col lg:flex-row gap-3 lg:gap-6 p-3 lg:p-6 overflow-auto lg:overflow-hidden">
-
-            {/* Mobile: Top row with Products + Kit side by side */}
             <div className="flex flex-row lg:contents gap-3 h-[55vh] lg:h-auto">
-              {/* Left Column (Product Catalog) */}
               <section className="flex flex-col w-1/2 lg:w-1/4 lg:min-w-[280px] h-full lg:h-full overflow-hidden">
                 <Warehouse />
               </section>
-
-              {/* Center Column (Your Catalog Builder) */}
               <section className={`flex flex-col w-1/2 lg:flex-1 h-full lg:h-full bg-white border-2 border-green-primary rounded-xl lg:rounded-3xl overflow-hidden shadow-sm relative transition-transform duration-300 ${dropAnimation ? 'scale-95' : 'scale-100'}`}>
                 <CatalogBuilder dropAnimation={dropAnimation} onDrop={handleDrop} />
               </section>
             </div>
-
-            {/* Right Column (Summary & Actions) */}
             <section className="flex flex-col w-full lg:w-1/4 lg:min-w-[280px] gap-3 lg:gap-4">
               <TotalPanel />
             </section>
           </main>
         </div>
-
         {toast && <Toast message={toast.message} type={toast.type} />}
       </DndProvider>
     </ErrorBoundary>
