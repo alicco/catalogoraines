@@ -21,11 +21,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import useStore from '../lib/store';
 import { supabase } from '../lib/supabaseClient';
 
+import { processProductImage } from '../lib/imageProcessor';
+
 export const ProductEditor = () => {
     const [open, setOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState('');
     const [previewUrl, setPreviewUrl] = useState('');
     const fileInputRef = useRef(null);
 
@@ -53,6 +56,7 @@ export const ProductEditor = () => {
                 iva: '22', formato_cartone: '', unita_vendita: 'PZ', costo_al_metro: '' 
             });
             setPreviewUrl('');
+            setUploadProgress('');
             setIsEditing(false);
             setOpen(true);
         };
@@ -73,6 +77,7 @@ export const ProductEditor = () => {
             };
             setFormData(data);
             setPreviewUrl(data.image_url);
+            setUploadProgress('');
             setIsEditing(true);
             setOpen(true);
         };
@@ -94,39 +99,73 @@ export const ProductEditor = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Preview locale immediata
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewUrl(objectUrl);
+        if (!formData.id) {
+            alert('Per favore, inserisci prima il Codice Articolo per poter elaborare l\'immagine.');
+            return;
+        }
 
-        // Upload automatico su Supabase
         setUploading(true);
+        setUploadProgress('Inizializzazione...');
+        
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${formData.id || 'new'}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const filePath = `products/${fileName}`;
+            // 1. Processamento Immagine (Scontorno, Resize, SVG) nel browser
+            setUploadProgress('Scontorno e ridimensionamento...');
+            const { blob, fileName } = await processProductImage(file, formData.id);
+
+            // 2. Upload su Supabase (Bucket: catalog)
+            setUploadProgress('Caricamento su database...');
+            const filePath = `raines_images_cleaned/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
-                .from('product-images')
-                .upload(filePath, file);
+                .from('catalog')
+                .upload(filePath, blob, {
+                    contentType: 'image/svg+xml',
+                    upsert: true
+                });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                // Se il bucket 'catalog' non esiste, proviamo a usare 'product-images' come fallback
+                console.warn('Bucket catalog non trovato, ripiego su product-images');
+                const { error: fallbackError } = await supabase.storage
+                    .from('product-images')
+                    .upload(`products/${fileName}`, blob, {
+                        contentType: 'image/svg+xml',
+                        upsert: true
+                    });
+                
+                if (fallbackError) throw fallbackError;
 
-            const { data: publicData } = supabase.storage
-                .from('product-images')
-                .getPublicUrl(filePath);
+                const { data: publicData } = supabase.storage
+                    .from('product-images')
+                    .getPublicUrl(`products/${fileName}`);
 
-            setFormData(prev => ({ ...prev, image_url: publicData.publicUrl }));
+                setFormData(prev => ({ ...prev, image_url: publicData.publicUrl }));
+                setPreviewUrl(publicData.publicUrl);
+            } else {
+                const { data: publicData } = supabase.storage
+                    .from('catalog')
+                    .getPublicUrl(filePath);
+
+                setFormData(prev => ({ ...prev, image_url: publicData.publicUrl }));
+                setPreviewUrl(publicData.publicUrl);
+            }
+
+            setUploadProgress('Completato!');
         } catch (error) {
-            console.error('Error uploading image:', error);
-            alert('Errore caricamento immagine: ' + error.message);
+            console.error('Error processing/uploading image:', error);
+            alert('Errore durante l\'elaborazione dell\'immagine: ' + error.message);
+            setUploadProgress('Errore');
         } finally {
             setUploading(false);
+            // Reset input per permettere re-upload dello stesso file se necessario
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
     const handleRemoveImage = () => {
         setPreviewUrl('');
         setFormData(prev => ({ ...prev, image_url: '' }));
+        setUploadProgress('');
     };
 
     const handleSave = async () => {
@@ -225,8 +264,17 @@ export const ProductEditor = () => {
                                 )}
                                 
                                 {uploading && (
-                                    <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, bgcolor: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyItems: 'center' }}>
-                                        <CircularProgress size={30} sx={{ m: 'auto', color: '#2E5C45' }} />
+                                    <Box sx={{ 
+                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+                                        bgcolor: 'rgba(255,255,255,0.85)', 
+                                        display: 'flex', flexDirection: 'column', 
+                                        alignItems: 'center', justifyContent: 'center',
+                                        zIndex: 10, p: 2, textAlign: 'center'
+                                    }}>
+                                        <CircularProgress size={40} sx={{ mb: 2, color: '#2E5C45' }} />
+                                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#2E5C45' }}>
+                                            {uploadProgress}
+                                        </Typography>
                                     </Box>
                                 ) }
                             </Box>
@@ -314,7 +362,7 @@ export const ProductEditor = () => {
                                     label="IVA (%)"
                                     name="iva"
                                     type="number"
-                                    inputProps={{ min: 0, max: 22 }}
+                                    InputProps={{ inputProps: { min: 0, max: 22 } }}
                                     value={formData.iva}
                                     onChange={handleChange}
                                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
