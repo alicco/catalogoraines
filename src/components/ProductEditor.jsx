@@ -37,7 +37,6 @@ export const ProductEditor = () => {
         price: '',
         category: 'Altro',
         image_url: '',
-        emoji: '📦',
         iva: '22',
         formato_cartone: '',
         unita_vendita: 'PZ',
@@ -50,7 +49,7 @@ export const ProductEditor = () => {
         const handleNew = () => {
             setFormData({ 
                 id: '', name: '', description: '', extended_description: '', 
-                price: '', category: 'Altro', image_url: '', emoji: '📦', 
+                price: '', category: 'Altro', image_url: '', 
                 iva: '22', formato_cartone: '', unita_vendita: 'PZ', costo_al_metro: '' 
             });
             setPreviewUrl('');
@@ -67,7 +66,6 @@ export const ProductEditor = () => {
                 price: item.price || '',
                 category: item.category || 'Altro',
                 image_url: item.image_url || item.image || '',
-                emoji: item.emoji || '📦',
                 iva: item.iva || '22',
                 formato_cartone: item.formato_cartone || '',
                 unita_vendita: item.unita_vendita || 'PZ',
@@ -107,7 +105,7 @@ export const ProductEditor = () => {
             const fileName = `${formData.id || 'new'}-${Math.random().toString(36).substring(2)}.${fileExt}`;
             const filePath = `products/${fileName}`;
 
-            const { error: uploadError, data } = await supabase.storage
+            const { error: uploadError } = await supabase.storage
                 .from('product-images')
                 .upload(filePath, file);
 
@@ -199,13 +197,13 @@ export const ProductEditor = () => {
 
             <DialogContent sx={{ p: 4, bgcolor: '#fdfdfd' }}>
                 <Grid container spacing={4}>
-                    {/* Sezione Sinistra: Immagine e Emoji */}
+                    {/* Sezione Sinistra: Immagine */}
                     <Grid item xs={12} md={4}>
                         <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
                             <Box 
                                 sx={{ 
-                                    width: 180, 
-                                    height: 180, 
+                                    width: '100%', 
+                                    aspectRatio: '1/1',
                                     borderRadius: '20px', 
                                     bgcolor: '#f0f2f0',
                                     border: '2px dashed #bcc4c0',
@@ -250,16 +248,6 @@ export const ProductEditor = () => {
                                     </IconButton>
                                 )}
                             </Box>
-
-                            <TextField
-                                fullWidth
-                                label="Emoji Identificativa"
-                                name="emoji"
-                                value={formData.emoji}
-                                onChange={handleChange}
-                                placeholder="📦"
-                                sx={{ mt: 2 }}
-                            />
                         </Box>
                     </Grid>
 
@@ -267,7 +255,7 @@ export const ProductEditor = () => {
                     <Grid item xs={12} md={8}>
                         <Typography variant="overline" color="textSecondary" sx={{ fontWeight: 800 }}>Informazioni Generali</Typography>
                         <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={4}>
                                 <TextField
                                     fullWidth
                                     label="Codice Articolo"
@@ -279,11 +267,11 @@ export const ProductEditor = () => {
                                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
                                 />
                             </Grid>
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={12} sm={8}>
                                 <TextField
                                     fullWidth
                                     select
-                                    label="Categoria"
+                                    label="Sezione Prodotto (Categoria)"
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
@@ -323,16 +311,14 @@ export const ProductEditor = () => {
                             <Grid item xs={12} sm={4}>
                                 <TextField
                                     fullWidth
-                                    select
-                                    label="IVA %"
+                                    label="IVA (%)"
                                     name="iva"
+                                    type="number"
+                                    inputProps={{ min: 0, max: 22 }}
                                     value={formData.iva}
                                     onChange={handleChange}
-                                >
-                                    <MenuItem value="4">4%</MenuItem>
-                                    <MenuItem value="10">10%</MenuItem>
-                                    <MenuItem value="22">22%</MenuItem>
-                                </TextField>
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                                />
                             </Grid>
                             <Grid item xs={12} sm={4}>
                                 <TextField

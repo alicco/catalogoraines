@@ -117,6 +117,14 @@ export function ProductManager() {
                     // OR check if it matches the user's specific file format from previous turn.
                     // The user file had: CATEGORIA PRODOTTO,ARTICOLO,...,CODICE,IMMAGINE,PREZZO
 
+                    // Let's check typical export format first (cols[0] is ID usually in our export)
+                    // BUT if importing the file we saw:
+                    // Col 0: Categoria
+                    // Col 1: Articolo (Name)
+                    // ...
+                    // Col 6: Codice (ID)
+                    // Col 8: Prezzo
+
                     let product = {};
 
                     // Helper to clean quotes
@@ -230,7 +238,7 @@ export function ProductManager() {
                     </div>
                     <h3 className="text-xl font-black text-green-dark mb-4 uppercase tracking-tight">Eliminare Prodotto?</h3>
                     <p className="text-sm text-green-mid font-medium mb-8 leading-relaxed">Questa azione è irreversibile. Il prodotto verrà rimosso permanentemente dal catalogo.</p>
-
+185
                     <div className="flex gap-4 justify-center">
                         <button
                             onClick={() => setDeleteConfirmOpen(false)}
@@ -267,19 +275,6 @@ export function ProductManager() {
                 </div>
 
                 <div className="flex gap-4 items-center">
-                    <button
-                        onClick={() => {
-                            if (filteredInventory.length > 0) {
-                                console.log("Test: Editing first product");
-                                handleEdit(filteredInventory[0]);
-                            } else {
-                                alert("Nessun prodotto da modificare");
-                            }
-                        }}
-                        className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
-                    >
-                        Debug: Modifica Primo
-                    </button>
                     <span className="hidden lg:flex bg-white/10 text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase">
                         {filteredInventory.length} Articoli
                     </span>
