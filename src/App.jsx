@@ -129,6 +129,14 @@ function App() {
     );
   }
 
+  // SHARED WRAPPER for specialized views - ensures proper layout and global tools
+  const ViewWrapper = ({ children }) => (
+    <div className="h-screen w-screen bg-paper overflow-hidden flex flex-col relative">
+      {children}
+      <ProductEditor />
+    </div>
+  );
+
   if (!isAuthenticated) {
     return <LoginPage />;
   }
@@ -136,8 +144,9 @@ function App() {
   if (currentView === 'product-manager') {
     return (
       <ErrorBoundary>
-        <ProductManager />
-        <ProductEditor />
+        <ViewWrapper>
+          <ProductManager />
+        </ViewWrapper>
       </ErrorBoundary>
     );
   }
@@ -145,7 +154,9 @@ function App() {
   if (currentView === 'quote-manager') {
     return (
       <ErrorBoundary>
-        <QuoteManager />
+        <ViewWrapper>
+          <QuoteManager />
+        </ViewWrapper>
       </ErrorBoundary>
     );
   }
@@ -153,7 +164,9 @@ function App() {
   if (currentView === 'promo-manager') {
     return (
       <ErrorBoundary>
-        <PromoManager />
+        <ViewWrapper>
+          <PromoManager />
+        </ViewWrapper>
       </ErrorBoundary>
     );
   }
@@ -161,9 +174,9 @@ function App() {
   if (currentView === 'image-associator') {
     return (
       <ErrorBoundary>
-        <div className="h-screen w-screen bg-paper overflow-hidden flex flex-col">
+        <ViewWrapper>
           <ImageAssociator />
-        </div>
+        </ViewWrapper>
       </ErrorBoundary>
     );
   }

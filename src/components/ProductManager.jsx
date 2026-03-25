@@ -23,6 +23,11 @@ export function ProductManager() {
 
     // We reuse the event system to trigger the existing ProductEditor dialog
     const handleEdit = (product) => {
+        if (!product) {
+            console.error("ProductManager: handleEdit called without product");
+            return;
+        }
+        console.log("ProductManager: Triggering edit for", product.id);
         const event = new CustomEvent('edit-product', { detail: product });
         window.dispatchEvent(event);
     };
@@ -192,14 +197,22 @@ export function ProductManager() {
             width: 100,
             sortable: false,
             renderCell: (params) => (
-                <div className="flex gap-1 h-full items-center">
+                <div className="flex gap-1 h-full items-center" style={{ zIndex: 100, pointerEvents: 'auto' }}>
                     <Tooltip title="Modifica">
-                        <IconButton size="small" onClick={() => handleEdit(params.row)} className="text-teal">
+                        <IconButton 
+                            size="small" 
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                console.log("Click edit icon detected for row", params.row.id);
+                                handleEdit(params.row);
+                            }} 
+                            sx={{ color: '#2E5C45', backgroundColor: 'rgba(46, 92, 69, 0.05)', '&:hover': { backgroundColor: 'rgba(46, 92, 69, 0.15)' } }}
+                        >
                             <EditIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
                     <Tooltip title="Elimina">
-                        <IconButton size="small" onClick={() => handleDeleteClick(params.row.id)} className="text-red-500 hover:bg-red-50">
+                        <IconButton size="small" onClick={(e) => { e.stopPropagation(); handleDeleteClick(params.row.id); }} className="text-red-500 hover:bg-red-50">
                             <DeleteIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
@@ -209,7 +222,7 @@ export function ProductManager() {
     ];
 
     return (
-        <div className="h-full flex flex-col bg-paper overflow-hidden">
+        <div className="flex-1 flex flex-col bg-paper overflow-hidden">
             {/* Delete Confirmation Dialog */}
             <Dialog
                 open={deleteConfirmOpen}
@@ -262,8 +275,21 @@ export function ProductManager() {
                 </div>
 
                 <div className="flex gap-4 items-center">
+                    <button
+                        onClick={() => {
+                            if (filteredInventory.length > 0) {
+                                console.log("Test: Editing first product");
+                                handleEdit(filteredInventory[0]);
+                            } else {
+                                alert("Nessun prodotto da modificare");
+                            }
+                        }}
+                        className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                    >
+                        Debug: Modifica Primo
+                    </button>
                     <span className="hidden lg:flex bg-white/10 text-white border border-white/20 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase">
-                        {filteredInventory.length} Articoli Caricati
+                        {filteredInventory.length} Articoli
                     </span>
                     <button
                         onClick={handleNew}
@@ -366,6 +392,7 @@ export function ProductManager() {
                                 borderBottom: '1px solid #f0f3f1',
                                 fontSize: '13px',
                                 fontWeight: '500',
+Comment: 
                             },
                             '& .MuiDataGrid-columnHeader': {
                                 backgroundColor: '#F8FAF9',
