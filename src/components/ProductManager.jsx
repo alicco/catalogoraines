@@ -117,14 +117,6 @@ export function ProductManager() {
                     // OR check if it matches the user's specific file format from previous turn.
                     // The user file had: CATEGORIA PRODOTTO,ARTICOLO,...,CODICE,IMMAGINE,PREZZO
 
-                    // Let's check typical export format first (cols[0] is ID usually in our export)
-                    // BUT if importing the file we saw:
-                    // Col 0: Categoria
-                    // Col 1: Articolo (Name)
-                    // ...
-                    // Col 6: Codice (ID)
-                    // Col 8: Prezzo
-
                     let product = {};
 
                     // Helper to clean quotes
@@ -392,7 +384,6 @@ export function ProductManager() {
                                 borderBottom: '1px solid #f0f3f1',
                                 fontSize: '13px',
                                 fontWeight: '500',
-Comment: 
                             },
                             '& .MuiDataGrid-columnHeader': {
                                 backgroundColor: '#F8FAF9',
