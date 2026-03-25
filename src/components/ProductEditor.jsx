@@ -23,7 +23,7 @@ export const ProductEditor = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        id: '', // Internally this is codice_articolo
+        id: '', // This matches codice_articolo
         name: '',
         description: '',
         extended_description: '',
@@ -40,13 +40,10 @@ export const ProductEditor = () => {
         costo_al_metro: ''
     });
 
-    const categories = useStore((state) => {
-        const activeUnits = state.inventory.map(item => item.category).filter(Boolean);
-        return [...new Set([...defaultCategories, ...activeUnits])].sort();
-    });
+    const categories = useStore((state) => state.categories);
 
     useEffect(() => {
-        console.log("ProductEditor: Component mounted and listening for events on pbzeuxbmiawnjwpnbwkh");
+        console.log("ProductEditor: Component mounted and listening for events");
         const handleNew = () => {
             console.log("ProductEditor: Received 'new-product' event");
             setFormData({ id: '', name: '', description: '', extended_description: '', price: '', category: 'Altro', image: '', image_url: '', emoji: '📦', subtitle: '', packaging: '', iva: '22', formato_cartone: '', unita_vendita: 'PZ', costo_al_metro: '' });
@@ -110,8 +107,6 @@ export const ProductEditor = () => {
                 updated_at: new Date().toISOString()
             };
 
-            console.log("ProductEditor: Saving to 'catalogo' on ProgettoRaines", productData);
-
             if (isEditing) {
                 const { error } = await supabase
                     .from('catalogo')
@@ -125,7 +120,6 @@ export const ProductEditor = () => {
                 if (error) throw error;
             }
 
-            console.log("ProductEditor: Save successful, refreshing catalog...");
             await useStore.getState().fetchCatalog();
             setOpen(false);
         } catch (error) {

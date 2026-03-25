@@ -95,7 +95,7 @@ function App() {
 
   useEffect(() => {
     checkUser();
-  }, [checkUser]);
+  }, []); // Run only on mount
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -108,7 +108,7 @@ function App() {
         setToast({ message: "Catalogo caricato!", type: "info" });
       }
     }
-  }, [fetchCatalog, isAuthenticated]);
+  }, [isAuthenticated]); // Only re-run when auth status changes
 
   // Handle item drop - called from CatalogBuilder
   const handleDrop = (item) => {

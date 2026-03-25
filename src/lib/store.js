@@ -232,6 +232,10 @@ const useStore = create((set, get) => ({
 
     // --- Auth Actions ---
     checkUser: async () => {
+        const state = get();
+        // Prevent multiple simultaneous checks or redundant listeners
+        if (state.user && !state.authLoading) return;
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
             set({
@@ -244,12 +248,16 @@ const useStore = create((set, get) => ({
             set({ user: null, isAuthenticated: false, authLoading: false });
         }
 
-        supabase.auth.onAuthStateChange((_event, session) => {
-            set({
-                user: session?.user || null,
-                isAuthenticated: !!session?.user,
+        // Initialize listener ONLY ONCE if not already present
+        if (!window._authListenerAttached) {
+            supabase.auth.onAuthStateChange((_event, session) => {
+                set({
+                    user: session?.user || null,
+                    isAuthenticated: !!session?.user,
+                });
             });
-        });
+            window._authListenerAttached = true;
+        }
     },
 
     signIn: async (email, password) => {
