@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import useStore from '../lib/store';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 
 const defaultCategories = ['Accessori', 'Fissaggi', 'Guarnizioni', 'Profili', 'Sistemi', 'Ricambi', 'Altro'];
 
@@ -23,7 +23,7 @@ export const ProductEditor = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
-        id: '',
+        id: '', // Internally this is codice_articolo
         name: '',
         description: '',
         extended_description: '',
@@ -35,7 +35,6 @@ export const ProductEditor = () => {
         subtitle: '',
         packaging: '',
         iva: '22',
-        formota_cartone: '', // legacy field name
         formato_cartone: '',
         unita_vendita: 'PZ',
         costo_al_metro: ''
@@ -47,7 +46,7 @@ export const ProductEditor = () => {
     });
 
     useEffect(() => {
-        console.log("ProductEditor: Component mounted and listening for events");
+        console.log("ProductEditor: Component mounted and listening for events on pbzeuxbmiawnjwpnbwkh");
         const handleNew = () => {
             console.log("ProductEditor: Received 'new-product' event");
             setFormData({ id: '', name: '', description: '', extended_description: '', price: '', category: 'Altro', image: '', image_url: '', emoji: '📦', subtitle: '', packaging: '', iva: '22', formato_cartone: '', unita_vendita: 'PZ', costo_al_metro: '' });
@@ -55,10 +54,10 @@ export const ProductEditor = () => {
             setOpen(true);
         };
         const handleEdit = (e) => {
-            console.log("ProductEditor: Received 'edit-product' event for", e.detail?.id);
             const item = e.detail;
+            console.log("ProductEditor: Received 'edit-product' event for", item.id || item.code);
             setFormData({
-                id: item.id || '',
+                id: item.id || item.code || '',
                 name: item.name || '',
                 description: item.description || '',
                 extended_description: item.extended_description || '',
@@ -95,37 +94,38 @@ export const ProductEditor = () => {
     const handleSave = async () => {
         setLoading(true);
         try {
+            // MAPPING: React fields -> Database fields (catalogo table)
             const productData = {
-                name: formData.name,
-                description: formData.description,
-                extended_description: formData.extended_description,
-                price: parseFloat(formData.price) || 0,
-                category: formData.category,
-                image_url: formData.image_url || formData.image,
-                emoji: formData.emoji,
+                codice_articolo: formData.id,
+                descrizione: formData.name,
+                specifiche: formData.description,
+                descrizione_estesa: formData.extended_description,
+                costo: parseFloat(formData.price) || 0,
+                categoria: formData.category,
+                link_immagine: formData.image_url || formData.image,
                 iva: formData.iva,
                 formato_cartone: formData.formato_cartone,
                 unita_vendita: formData.unita_vendita,
                 costo_al_metro: formData.costo_al_metro ? parseFloat(formData.costo_al_metro) : null,
-                metadata: {
-                    subtitle: formData.subtitle,
-                    packaging: formData.packaging
-                }
+                updated_at: new Date().toISOString()
             };
+
+            console.log("ProductEditor: Saving to 'catalogo' on ProgettoRaines", productData);
 
             if (isEditing) {
                 const { error } = await supabase
-                    .from('printers')
+                    .from('catalogo')
                     .update(productData)
-                    .eq('id', formData.id);
+                    .eq('codice_articolo', formData.id);
                 if (error) throw error;
             } else {
                 const { error } = await supabase
-                    .from('printers')
+                    .from('catalogo')
                     .insert([productData]);
                 if (error) throw error;
             }
 
+            console.log("ProductEditor: Save successful, refreshing catalog...");
             await useStore.getState().fetchCatalog();
             setOpen(false);
         } catch (error) {
@@ -151,11 +151,12 @@ export const ProductEditor = () => {
                     <Grid item xs={12} sm={8}>
                         <TextField
                             fullWidth
-                            label="Nome Prodotto"
-                            name="name"
-                            value={formData.name}
+                            label="Codice Articolo (ID)"
+                            name="id"
+                            value={formData.id}
                             onChange={handleChange}
                             variant="outlined"
+                            disabled={isEditing}
                         />
                     </Grid>
                     <Grid item xs={12} sm={4}>
@@ -171,9 +172,9 @@ export const ProductEditor = () => {
                     <Grid item xs={12}>
                         <TextField
                             fullWidth
-                            label="Sottotitolo / Info Breve"
-                            name="subtitle"
-                            value={formData.subtitle}
+                            label="Nome Prodotto (Descrizione)"
+                            name="name"
+                            value={formData.name}
                             onChange={handleChange}
                             variant="outlined"
                         />
@@ -195,7 +196,7 @@ export const ProductEditor = () => {
                     <Grid item xs={12} sm={6}>
                         <TextField
                             fullWidth
-                            label="Prezzo Listino"
+                            label="Prezzo Listino (Costo)"
                             name="price"
                             type="number"
                             value={formData.price}
@@ -230,7 +231,7 @@ export const ProductEditor = () => {
                     <Grid item xs={12} sm={4}>
                         <TextField
                             fullWidth
-                            label="Formato Cartone (es. 20ML)"
+                            label="Formato Cartone"
                             name="formato_cartone"
                             value={formData.formato_cartone}
                             onChange={handleChange}
@@ -251,7 +252,7 @@ export const ProductEditor = () => {
                             fullWidth
                             multiline
                             rows={2}
-                            label="Descrizione Breve"
+                            label="Specifiche / Descrizione Breve"
                             name="description"
                             value={formData.description}
                             onChange={handleChange}
@@ -262,18 +263,9 @@ export const ProductEditor = () => {
                             fullWidth
                             multiline
                             rows={4}
-                            label="Descrizione Estesa / Note Tecniche"
+                            label="Descrizione Estesa"
                             name="extended_description"
                             value={formData.extended_description}
-                            onChange={handleChange}
-                        />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            label="Packaging / Dettagli imballo"
-                            name="packaging"
-                            value={formData.packaging}
                             onChange={handleChange}
                         />
                     </Grid>
@@ -285,7 +277,7 @@ export const ProductEditor = () => {
                     onClick={handleSave} 
                     variant="contained" 
                     color="primary" 
-                    disabled={loading || !formData.name}
+                    disabled={loading || !formData.name || !formData.id}
                 >
                     {loading ? 'Salvataggio...' : 'Salva Prodotto'}
                 </Button>
