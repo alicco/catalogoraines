@@ -126,7 +126,6 @@ export const ProductEditor = () => {
             if (uploadError) {
                 // Se il bucket 'catalog' non esiste, proviamo a usare 'product-images' come fallback
                 console.warn('Bucket catalog non trovato, ripiego su product-images');
-                const { error: fallbackError } = await supabase.storage
                     .from('product-images')
                     .upload(`products/${fileName}`, blob, {
                         contentType: 'image/svg+xml',
@@ -135,9 +134,11 @@ export const ProductEditor = () => {
                 
                 if (fallbackError) throw fallbackError;
 
+
                 const { data: publicData } = supabase.storage
                     .from('product-images')
                     .getPublicUrl(`products/${fileName}`);
+
 
                 setFormData(prev => ({ ...prev, image_url: publicData.publicUrl }));
                 setPreviewUrl(publicData.publicUrl);
@@ -146,9 +147,11 @@ export const ProductEditor = () => {
                     .from('catalog')
                     .getPublicUrl(filePath);
 
+
                 setFormData(prev => ({ ...prev, image_url: publicData.publicUrl }));
                 setPreviewUrl(publicData.publicUrl);
             }
+
 
             setUploadProgress('Completato!');
         } catch (error) {
@@ -162,11 +165,13 @@ export const ProductEditor = () => {
         }
     };
 
+
     const handleRemoveImage = () => {
         setPreviewUrl('');
         setFormData(prev => ({ ...prev, image_url: '' }));
         setUploadProgress('');
     };
+
 
     const handleSave = async () => {
         if (!formData.id || !formData.name) {
@@ -196,249 +201,40 @@ export const ProductEditor = () => {
                     .from('catalogo')
                     .update(productData)
                     .eq('codice_articolo', formData.id);
+
                 if (error) throw error;
             } else {
+                // CONTROLLO UNICITA: Verifichiamo se il codice esiste gia
+                const { data: existing, error: checkError } = await supabase
+                    .from('catalogo')
+                    .select('codice_articolo')
+                    .eq('codice_articolo', formData.id)
+                    .maybeSingle();
+                
+                if (checkError) throw checkError;
+                if (existing) {
+                    alert(`ATTENZIONE: Il codice articolo "${formData.id}" è già presente nel catalogo!\n\nSe vuoi aggiornare questo prodotto, usa la funzione "Modifica" dalla lista.\nSe vuoi creare un nuovo prodotto, scegli un codice differente.`);
+                    setLoading(false);
+                    return;
+                }
+
                 const { error } = await supabase
                     .from('catalogo')
                     .insert([productData]);
+
                 if (error) throw error;
             }
 
             await useStore.getState().fetchCatalog();
-            setOpen(false);
+            onClose();
         } catch (error) {
-            console.error('Error saving product:', error);
+            console.error('Save error:', error);
             alert('Errore durante il salvataggio: ' + error.message);
         } finally {
             setLoading(false);
         }
     };
 
+
     return (
         <Dialog 
-            open={open} 
-            onClose={() => setOpen(false)} 
-            maxWidth="md" 
-            fullWidth
-            PaperProps={{
-                className: 'card-skeuo',
-                sx: { borderRadius: '24px', overflow: 'hidden', border: 'none' }
-            }}
-        >
-            <Box className="bg-green-primary p-4 flex justify-between items-center border-b border-green-dark">
-                <Typography variant="h5" sx={{ color: 'white', fontWeight: 900, letterSpacing: '-0.5px' }}>
-                    {isEditing ? '🖊️ MODIFICA PRODOTTO' : '✨ NUOVO PRODOTTO'}
-                </Typography>
-                <IconButton onClick={() => setOpen(false)} sx={{ color: 'white' }}>
-                    <CloseIcon />
-                </IconButton>
-            </Box>
-
-            <DialogContent sx={{ p: 4, bgcolor: '#fdfdfd' }}>
-                <Grid container spacing={4}>
-                    {/* Sezione Sinistra: Immagine */}
-                    <Grid item xs={12} md={4}>
-                        <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-                            <Box 
-                                sx={{ 
-                                    width: '100%', 
-                                    aspectRatio: '1/1',
-                                    borderRadius: '20px', 
-                                    bgcolor: '#f0f2f0',
-                                    border: '2px dashed #bcc4c0',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                    boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.05)'
-                                }}
-                            >
-                                {previewUrl ? (
-                                    <Box component="img" src={previewUrl} sx={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                                ) : (
-                                    <Box textAlign="center" p={2}>
-                                        <CloudUploadIcon sx={{ fontSize: 48, color: '#bcc4c0' }} />
-                                        <Typography variant="caption" display="block" color="textSecondary">Nessuna Immagine</Typography>
-                                    </Box>
-                                )}
-                                
-                                {uploading && (
-                                    <Box sx={{ 
-                                        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
-                                        bgcolor: 'rgba(255,255,255,0.85)', 
-                                        display: 'flex', flexDirection: 'column', 
-                                        alignItems: 'center', justifyContent: 'center',
-                                        zIndex: 10, p: 2, textAlign: 'center'
-                                    }}>
-                                        <CircularProgress size={40} sx={{ mb: 2, color: '#2E5C45' }} />
-                                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#2E5C45' }}>
-                                            {uploadProgress}
-                                        </Typography>
-                                    </Box>
-                                ) }
-                            </Box>
-
-                            <Box display="flex" gap={1} width="100%">
-                                <Button 
-                                    fullWidth 
-                                    component="label" 
-                                    className="btn-skeuo" 
-                                    sx={{ py: 1, fontSize: '0.75rem' }}
-                                    startIcon={<CloudUploadIcon />}
-                                >
-                                    Carica
-                                    <input type="file" hidden accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
-                                </Button>
-                                {previewUrl && (
-                                    <IconButton onClick={handleRemoveImage} color="error" className="panel-inset" sx={{ borderRadius: '8px' }}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                )}
-                            </Box>
-                        </Box>
-                    </Grid>
-
-                    {/* Sezione Destra: Campi Dati */}
-                    <Grid item xs={12} md={8}>
-                        <Typography variant="overline" color="textSecondary" sx={{ fontWeight: 800 }}>Informazioni Generali</Typography>
-                        <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    label="Codice Articolo"
-                                    name="id"
-                                    value={formData.id}
-                                    onChange={handleChange}
-                                    disabled={isEditing}
-                                    required
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={8}>
-                                <TextField
-                                    fullWidth
-                                    select
-                                    label="Sezione Prodotto (Categoria)"
-                                    name="category"
-                                    value={formData.category}
-                                    onChange={handleChange}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                                >
-                                    {categories.map((cat) => (
-                                        <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                                    ))}
-                                </TextField>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="Nome Prodotto"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleChange}
-                                    required
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                                />
-                            </Grid>
-                        </Grid>
-
-                        <Typography variant="overline" color="textSecondary" sx={{ fontWeight: 800, mt: 3, display: 'block' }}>Prezzi e Logistica</Typography>
-                        <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    label="Costo (€)"
-                                    name="price"
-                                    type="number"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    label="IVA (%)"
-                                    name="iva"
-                                    type="number"
-                                    InputProps={{ inputProps: { min: 0, max: 22 } }}
-                                    value={formData.iva}
-                                    onChange={handleChange}
-                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                                <TextField
-                                    fullWidth
-                                    label="U.M. (es. PZ, ML)"
-                                    name="unita_vendita"
-                                    value={formData.unita_vendita}
-                                    onChange={handleChange}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="Formato Cartone"
-                                    name="formato_cartone"
-                                    value={formData.formato_cartone}
-                                    onChange={handleChange}
-                                    placeholder="es. 10pz/ct"
-                                />
-                            </Grid>
-                        </Grid>
-                    </Grid>
-
-                    {/* Descrizioni in basso */}
-                    <Grid item xs={12}>
-                        <Typography variant="overline" color="textSecondary" sx={{ fontWeight: 800 }}>Dettagli</Typography>
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={2}
-                            label="Specifiche Tecniche"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            sx={{ mt: 1, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                        />
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={4}
-                            label="Descrizione Commerciale Estesa"
-                            name="extended_description"
-                            value={formData.extended_description}
-                            onChange={handleChange}
-                            sx={{ mt: 2, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                        />
-                    </Grid>
-                </Grid>
-            </DialogContent>
-
-            <DialogActions sx={{ p: 4, bgcolor: '#f0f2f0', gap: 2 }}>
-                <Button 
-                    onClick={() => setOpen(false)} 
-                    variant="outlined" 
-                    sx={{ 
-                        borderRadius: '12px', 
-                        borderColor: '#bcc4c0', 
-                        color: '#5D8C71',
-                        px: 4
-                    }}
-                >
-                    Annulla
-                </Button>
-                <Button 
-                    onClick={handleSave} 
-                    disabled={loading || uploading || !formData.name || !formData.id}
-                    className="btn-skeuo"
-                    sx={{ px: 6, py: 1.5, borderRadius: '12px', minWidth: 200 }}
-                >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'CONFERMA E SALVA'}
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
-};
