@@ -1,4 +1,4 @@
-import removeBackground from '@imgly/background-removal';
+import { removeBackground } from "@imgly/background-removal";
 
 /**
  * Processa un'immagine: scontorno, ridimensionamento 300x300, zoom centrato e conversione SVG.
